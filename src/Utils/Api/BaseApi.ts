@@ -1,6 +1,5 @@
 // api/axios-instance.ts
 import axios, {
-  type AxiosInstance,
   type AxiosRequestConfig,
   AxiosError,
   type InternalAxiosRequestConfig,
@@ -13,7 +12,7 @@ import { toast } from "sonner";
 import { authActions } from "../../Features/Auth/AuthSlice";
 import { store } from "../../Store/Store";
 
-const BASE_ADDRESS = "https://localhost:3000/";
+const BASE_ADDRESS = "http://localhost:3000/";
 const mutex = new Mutex();
 
 export interface ApiRequestOptions extends Omit<AxiosRequestConfig, "data"> {

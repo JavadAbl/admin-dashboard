@@ -1,29 +1,38 @@
 import { useState } from "react";
 import { cn } from "../../Utils/Cn";
+import { useAuthAction } from "../../Features/Auth/AuthApi";
+import { useAppDispatch } from "../../Hooks/ReduxHooks";
+import { authActions } from "../../Features/Auth/AuthSlice";
+import { storage } from "../../Utils/Storage";
+import { toast } from "sonner";
 
 export default function LoginPage() {
+  const dis = useAppDispatch();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const { mutate: mutateAuthAction, isPending: loading } = useAuthAction();
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      if (!username || !password) {
-        setError("Please fill in all fields");
-      } else {
-        console.log("Login:", { username, password });
-        alert("Login successful!");
-        setUsername("");
-        setPassword("");
-      }
-      setLoading(false);
-    }, 800);
+    if (!username || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
+    mutateAuthAction(
+      { username, password },
+      {
+        onSuccess: (res) => {
+          const { accessToken, refreshToken, user } = res.data;
+          storage.setTokens(accessToken, refreshToken);
+          dis(authActions.login({ user }));
+          toast.success("Login successful!");
+        },
+      },
+    );
   };
 
   return (
@@ -105,13 +114,16 @@ export default function LoginPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading}
                 className={cn(
-                  "btn btn-primary w-full mt-6",
-                  loading && "btn-disabled loading",
+                  "w-full btn btn-primary mt-6",
+                  loading && "btn-disabled",
                 )}
               >
-                {loading ? "Signing in..." : "Sign In"}
+                {!loading ? (
+                  "Sign In"
+                ) : (
+                  <span className={cn("loading loading-dots")} />
+                )}
               </button>
             </form>
           </div>

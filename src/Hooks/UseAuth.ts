@@ -19,6 +19,7 @@ export function useAuth() {
       const refreshToken = localStorage.getItem("refreshToken");
 
       if (!refreshToken) {
+        dis(authActions.logout());
         setIsAuthDone(true);
         return;
       }
@@ -29,7 +30,10 @@ export function useAuth() {
             dis(authActions.login());
           }
         })
-        .finally(() => setIsAuthDone(true));
+        .finally(() => {
+          dis(authActions.logout());
+          setIsAuthDone(true);
+        });
     };
 
     handleAuth();

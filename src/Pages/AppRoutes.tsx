@@ -9,11 +9,15 @@ import { useLayoutEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../Hooks/ReduxHooks";
 import { storage } from "../Utils/Storage";
 import { appActions } from "../Features/App/AppSlice";
+import { useAuth } from "../Hooks/UseAuth";
+import LoadingSpinner from "../Components/Utils/LoadingSpinner";
 
 export default function AppRoutes() {
   const theme = useAppSelector((s) => s.app.theme);
   const isAuth = useAppSelector((s) => s.auth.isAuth);
   const dis = useAppDispatch();
+
+  useAuth();
 
   useLayoutEffect(() => {
     const currentTheme = storage.getTheme();
@@ -22,7 +26,7 @@ export default function AppRoutes() {
   }, [dis, theme]);
 
   if (!theme) return null;
-  if (isAuth == null) return null;
+  if (isAuth == null) return <LoadingSpinner centerScreen={true} />;
   return (
     <div data-theme={theme}>
       <Routes>

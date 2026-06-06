@@ -1,0 +1,10 @@
+{
+  "login": [
+    {
+      "refreshToken": "refreshToken",
+      "accessToken": "accessToken",
+      "user": { "id": 1, "name": "Admin", "email": "admin@example.com" }
+    }
+  ],
+  "users": [{ "id": 1, "name": "Admin", "email": "admin@example.com" }]
+}
