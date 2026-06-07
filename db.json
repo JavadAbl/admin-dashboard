@@ -1,4 +1,5 @@
 {
+  "$schema": "./node_modules/json-server/schema.json",
   "login": [
     {
       "refreshToken": "refreshToken",
@@ -6,5 +7,153 @@
       "user": { "id": 1, "name": "Admin", "email": "admin@example.com" }
     }
   ],
-  "users": [{ "id": 1, "name": "Admin", "email": "admin@example.com" }]
+  "users": [{ "id": 1, "name": "Admin", "email": "admin@example.com" }],
+  "user": { "id": 1, "name": "Admin", "email": "admin@example.com" },
+  "kpiData": [
+    {
+      "title": "درآمد کل",
+      "value": "۲,۰۴۸,۸۶۴,۰۰۰",
+      "raw": 2048864000,
+      "unit": "تومان",
+      "change": "+۱۲.۵٪",
+      "trend": "up",
+      "icon": "IconCurrencyDollar",
+      "iconBg": "bg-primary/10 text-primary"
+    },
+    {
+      "title": "سفارشات کل",
+      "value": "toPersianNum(\"1,284\")",
+      "raw": 1284,
+      "unit": "سفارش",
+      "change": "+۸.۲٪",
+      "trend": "up",
+      "icon": "IconShoppingCart",
+      "iconBg": "bg-secondary/10 text-secondary"
+    },
+    {
+      "title": "مشتریان کل",
+      "value": "toPersianNum(\"3,672\")",
+      "raw": 3672,
+      "unit": "نفر",
+      "change": "-۲.۴٪",
+      "trend": "down",
+      "icon": "IconUsers",
+      "iconBg": "bg-accent/10 text-accent"
+    },
+    {
+      "title": "میانگین ارزش سفارش",
+      "value": "toPersianNum(\"1,594,000\")",
+      "raw": 1594000,
+      "unit": "تومان",
+      "change": "+۴.۱٪",
+      "trend": "up",
+      "icon": "IconPackage",
+      "iconBg": "bg-success/10 text-success"
+    }
+  ],
+  "recentOrders": [
+    {
+      "id": "۷۸۲۱",
+      "customer": "سارا احمدی",
+      "product": "هدفون بی‌سیم",
+      "amount": "۵,۴۵۹,۰۰۰",
+      "status": "تکمیل شده",
+      "date": "۲۵ دی ۱۴۰۳"
+    },
+    {
+      "id": "۷۸۲۰",
+      "customer": "مهدی رضایی",
+      "product": "ساعت هوشمند پرو",
+      "amount": "۱۴,۶۵۸,۰۰۰",
+      "status": "در حال پردازش",
+      "date": "۲۵ دی ۱۴۰۳"
+    },
+    {
+      "id": "۷۸۱۹",
+      "customer": "نیلوفر محمدی",
+      "product": "پایه لپ‌تاپ",
+      "amount": "۲,۵۱۹,۰۰۰",
+      "status": "تکمیل شده",
+      "date": "۲۴ دی ۱۴۰۳"
+    },
+    {
+      "id": "۷۸۱۸",
+      "customer": "امیر حسینی",
+      "product": "کیبورد مکانیکی",
+      "amount": "۷,۹۷۹,۰۰۰",
+      "status": "ارسال شده",
+      "date": "۲۴ دی ۱۴۰۳"
+    },
+    {
+      "id": "۷۸۱۷",
+      "customer": "فاطمه کریمی",
+      "product": "هاب USB-C",
+      "amount": "۳,۳۵۹,۰۰۰",
+      "status": "لغو شده",
+      "date": "۲۳ دی ۱۴۰۳"
+    },
+    {
+      "id": "۷۸۱۶",
+      "customer": "علی موسوی",
+      "product": "مانیتور ۴K",
+      "amount": "۲۵,۱۵۸,۰۰۰",
+      "status": "تکمیل شده",
+      "date": "۲۳ دی ۱۴۰۳"
+    }
+  ],
+  "weekDays": [
+    "شنبه",
+    "یکشنبه",
+    "دوشنبه",
+    "سه‌شنبه",
+    "چهارشنبه",
+    "پنجشنبه",
+    "جمعه"
+  ],
+  "persianMonths": [
+    "فروردین",
+    "اردیبهشت",
+    "خرداد",
+    "تیر",
+    "مرداد",
+    "شهریور",
+    "مهر",
+    "آبان",
+    "آذر",
+    "دی",
+    "بهمن",
+    "اسفند"
+  ],
+  "topProducts": [
+    {
+      "name": "هدفون بی‌سیم",
+      "sales": 342,
+      "revenue": "۱,۸۷۰,۳۰۰,۰۰۰",
+      "growth": 18.2
+    },
+    {
+      "name": "ساعت هوشمند پرو",
+      "sales": 218,
+      "revenue": "۳,۲۰۰,۳۶۰,۰۰۰",
+      "growth": 12.5
+    },
+    {
+      "name": "کیبورد مکانیکی",
+      "sales": 189,
+      "revenue": "۱,۵۰۹,۰۹۱,۰۰۰",
+      "growth": -3.1
+    },
+    {
+      "name": "مانیتور ۴K",
+      "sales": 156,
+      "revenue": "۳,۹۲۴,۶۴۸,۰۰۰",
+      "growth": 24.8
+    },
+    {
+      "name": "پایه لپ‌تاپ",
+      "sales": 134,
+      "revenue": "۳۳۷,۵۴۶,۰۰۰",
+      "growth": 6.4
+    }
+  ]
 }

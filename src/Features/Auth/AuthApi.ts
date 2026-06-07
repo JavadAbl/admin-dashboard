@@ -1,17 +1,18 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../Utils/Api/BaseApi";
 import type { AxiosError, AxiosResponse } from "axios";
-import type { User } from "./AuthTypes/User";
-import type { Auth } from "./AuthTypes/Auth";
+import type { User } from "./AuthTypes/UserType";
+import type { Auth } from "./AuthTypes/AuthType";
+import { MockData } from "../../Utils/Api/MockData";
 
 export const authQueryKeys = {
   user: () => ["user"] as const,
 };
 
 export function useGetUser() {
-  return useQuery<AxiosResponse<User>>({
+  return useQuery<User>({
     queryKey: authQueryKeys.user(),
-    queryFn: () => apiClient.get("User"),
+    queryFn: () => Promise.resolve(MockData.user),
     enabled: false,
   });
 }
@@ -22,6 +23,6 @@ export function useAuthAction() {
     AxiosError,
     { username: string; password: string }
   >({
-    mutationFn: (payload) => apiClient.post("Login", payload),
+    mutationFn: (payload) => apiClient.post("login", payload),
   });
 }

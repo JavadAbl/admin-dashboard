@@ -22,7 +22,17 @@ export default function LoginPage() {
       setError("Please fill in all fields");
       return;
     }
-    mutateAuthAction(
+
+    //Mock
+    storage.setTokens("accessToken", "refreshToken");
+    dis(
+      authActions.login({
+        user: { name: "Admin", email: "admin@example.com", id: 1 },
+      }),
+    );
+
+    //Production
+    /*   mutateAuthAction(
       { username, password },
       {
         onSuccess: (res) => {
@@ -32,7 +42,7 @@ export default function LoginPage() {
           toast.success("Login successful!");
         },
       },
-    );
+    ); */
   };
 
   return (

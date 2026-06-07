@@ -27,13 +27,13 @@ export function useAuth() {
       fetchUser()
         .then((res) => {
           if (!res.isError && res.data) {
-            dis(authActions.login());
+            dis(authActions.login({ user: res.data }));
           }
         })
-        .finally(() => {
+        .catch(() => {
           dis(authActions.logout());
-          setIsAuthDone(true);
-        });
+        })
+        .finally(() => setIsAuthDone(true));
     };
 
     handleAuth();

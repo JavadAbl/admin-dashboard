@@ -1,7 +1,8 @@
 class Storage {
   private themeKey = "theme";
   private accessTokenKey = "accessToken";
-  private refreshTokenKey = "accessToken";
+  private refreshTokenKey = "refreshToken";
+  private sidebarStateKey = "sidebarCollapsed"; // New key
 
   getTheme() {
     return localStorage.getItem(this.themeKey);
@@ -22,6 +23,15 @@ class Storage {
 
   getRefreshToken() {
     return localStorage.getItem(this.refreshTokenKey);
+  }
+
+  getSidebarCollapsed(): boolean {
+    const value = localStorage.getItem(this.sidebarStateKey);
+    return value ? JSON.parse(value) : false;
+  }
+
+  setSidebarCollapsed(isCollapsed: boolean) {
+    localStorage.setItem(this.sidebarStateKey, JSON.stringify(isCollapsed));
   }
 }
 

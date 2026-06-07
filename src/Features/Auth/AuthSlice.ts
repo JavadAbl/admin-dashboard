@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { authReducers } from "./AuthReducers";
-import type { User } from "./AuthTypes/User";
+import type { User } from "./AuthTypes/UserType";
 
 export interface AuthState {
   isAuth: boolean | null;
