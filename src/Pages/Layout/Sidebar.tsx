@@ -5,11 +5,14 @@ import SidebarMenuItem, {
 } from "./Components/SidebarMenuItem";
 
 const menuItems: SidebarMenuItemType[] = [
-  { name: "داشبورد", icon: "🏠", path: "/Dashboard" },
+  { name: "داشبورد", icon: "📊", path: "/Dashboard" },
   {
-    name: "محصولات",
-    icon: "📦",
-    path: "/Products",
+    name: "محصول",
+    icon: "🛍️",
+    children: [
+      { name: "مرور محصولات", icon: "📊", path: "/Products" },
+      { name: "لیست محصولات", icon: "📦", path: "/Products/List" },
+    ],
   },
   {
     name: "مشتریان",

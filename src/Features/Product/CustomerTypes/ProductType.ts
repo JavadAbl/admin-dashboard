@@ -1,14 +1,15 @@
 export interface Product {
   id: number;
   name: string;
-  email: string;
-  phone: string;
-  totalPurchases: number;
-  totalSpent: number;
-  lastPurchase: string;
+  sku: string;
+  category: string;
+  price: number;
+  costPrice: number;
+  stock: number;
+  minStock: number;
+  sold: number;
   status: string;
-  avatar: string;
-  city: string;
-  joinDate: string;
-  rating: number;
+  image: string;
+  brand: string;
+  createdAt: string;
 }

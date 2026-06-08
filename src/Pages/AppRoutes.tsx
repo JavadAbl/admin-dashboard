@@ -13,6 +13,7 @@ import { useAuth } from "../Hooks/UseAuth";
 import LoadingSpinner from "../Components/Utils/LoadingSpinner";
 import Customers from "./Customers/Customers";
 import Products from "./Products/Products";
+import ProductList from "./Products/ProductList/ProductList";
 
 export default function AppRoutes() {
   const theme = useAppSelector((s) => s.app.theme);
@@ -38,6 +39,7 @@ export default function AppRoutes() {
           <Route element={<Layout />}>
             <Route path="/Dashboard" element={<Dashboard />} />
             <Route path="/Products" element={<Products />} />
+            <Route path="/Products/List" element={<ProductList />} />
             <Route path="/Customers" element={<Customers />} />
           </Route>
         </Route>
