@@ -4,16 +4,17 @@ import SidebarMenuItem, {
   type SidebarMenuItemType,
 } from "./Components/SidebarMenuItem";
 
-// Updated menu items to include nested routes
 const menuItems: SidebarMenuItemType[] = [
   { name: "داشبورد", icon: "🏠", path: "/Dashboard" },
   {
-    name: "کاربران",
-    icon: "👥", // Changed icon slightly to differentiate
-    children: [
-      { name: "لیست کاربران", icon: "📝", path: "/Users/List" },
-      { name: "افزودن کاربر", icon: "➕", path: "/Users/Create" },
-    ],
+    name: "محصولات",
+    icon: "📦",
+    path: "/Products",
+  },
+  {
+    name: "مشتریان",
+    icon: "👥",
+    path: "/Customers",
   },
   { name: "تنضیمات", icon: "⚙️", path: "/Settings" },
   { name: "پیام ها", icon: "✉️", badge: 4, path: "/Messages" },
@@ -28,7 +29,7 @@ export default function Sidebar({
   isDesktopCollapsed,
   setIsDesktopCollapsed,
 }: Props) {
-  const { data: user } = useGetUser();
+  const { data: user, refetch: refetchUser } = useGetUser();
 
   useEffect(() => {
     const handleResize = () => {
@@ -42,6 +43,10 @@ export default function Sidebar({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (!user) refetchUser();
+  }, [refetchUser, user]);
 
   if (!user) return null;
 

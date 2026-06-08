@@ -11,6 +11,8 @@ import { storage } from "../Utils/Storage";
 import { appActions } from "../Features/App/AppSlice";
 import { useAuth } from "../Hooks/UseAuth";
 import LoadingSpinner from "../Components/Utils/LoadingSpinner";
+import Customers from "./Customers/Customers";
+import Products from "./Products/Products";
 
 export default function AppRoutes() {
   const theme = useAppSelector((s) => s.app.theme);
@@ -33,8 +35,10 @@ export default function AppRoutes() {
         <Route path="/" element={<Navigate to="/Dashboard" replace />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/Dashboard" element={<Layout />}>
-            <Route index element={<Dashboard />} />
+          <Route element={<Layout />}>
+            <Route path="/Dashboard" element={<Dashboard />} />
+            <Route path="/Products" element={<Products />} />
+            <Route path="/Customers" element={<Customers />} />
           </Route>
         </Route>
 

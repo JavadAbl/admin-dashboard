@@ -10,7 +10,7 @@ import DashboardRevenueByCategory from "./Components/DashboardRevenueByCategory"
 // --- Main Component ---
 export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-base-200/50 p-4 lg:p-8">
+    <div className="min-h-screen">
       {/* Header */}
       <DashboardHeader />
 
@@ -18,7 +18,7 @@ export default function Dashboard() {
       <DashboardKpi />
 
       {/* Charts Row 1 */}
-      <div className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <div className="mb-8 grid grid-cols-1 gap-2 xl:grid-cols-3">
         {/* Sales Trend */}
         <DashboardSalesTrend />
 
@@ -27,7 +27,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Row 2 */}
-      <div className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <div className="mb-8 grid grid-cols-1 gap-2 xl:grid-cols-3">
         {/* Revenue by Category */}
         <DashboardRevenueByCategory />
 
@@ -36,7 +36,7 @@ export default function Dashboard() {
       </div>
 
       {/* Table + Top Products Row */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 xl:grid-cols-3">
         {/* Recent Orders Table */}
         <DashboardRecentOrdersTable />
 
