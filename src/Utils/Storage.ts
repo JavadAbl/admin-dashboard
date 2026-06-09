@@ -17,6 +17,11 @@ class Storage {
     localStorage.setItem(this.refreshTokenKey, refreshToken);
   }
 
+  clearTokens() {
+    localStorage.removeItem(this.accessTokenKey);
+    localStorage.removeItem(this.refreshTokenKey);
+  }
+
   getAccessToken() {
     return localStorage.getItem(this.accessTokenKey);
   }

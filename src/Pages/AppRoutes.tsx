@@ -14,6 +14,7 @@ import LoadingSpinner from "../Components/Utils/LoadingSpinner";
 import Customers from "./Customers/Customers";
 import Products from "./Products/Products";
 import ProductList from "./Products/ProductList/ProductList";
+import ProductDetails from "./Products/Components/ProductDetails";
 
 export default function AppRoutes() {
   const theme = useAppSelector((s) => s.app.theme);
@@ -26,7 +27,7 @@ export default function AppRoutes() {
     const currentTheme = storage.getTheme();
     if (currentTheme) dis(appActions.setTheme({ theme: currentTheme }));
     else dis(appActions.setTheme({ theme: "light" }));
-  }, [dis, theme]);
+  }, [dis]);
 
   if (!theme) return null;
   if (isAuth == null) return <LoadingSpinner centerScreen={true} />;
@@ -40,6 +41,7 @@ export default function AppRoutes() {
             <Route path="/Dashboard" element={<Dashboard />} />
             <Route path="/Products" element={<Products />} />
             <Route path="/Products/List" element={<ProductList />} />
+            <Route path="/Products/:id" element={<ProductDetails />} />
             <Route path="/Customers" element={<Customers />} />
           </Route>
         </Route>

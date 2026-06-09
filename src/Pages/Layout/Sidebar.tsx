@@ -3,6 +3,11 @@ import { useGetUser } from "../../Features/Auth/AuthApi";
 import SidebarMenuItem, {
   type SidebarMenuItemType,
 } from "./Components/SidebarMenuItem";
+import { useAppDispatch, useAppSelector } from "../../Hooks/ReduxHooks";
+import { LogOut, Moon, Settings, Sun } from "lucide-react";
+import { storage } from "../../Utils/Storage";
+import { authActions } from "../../Features/Auth/AuthSlice";
+import { appActions } from "../../Features/App/AppSlice";
 
 const menuItems: SidebarMenuItemType[] = [
   { name: "داشبورد", icon: "📊", path: "/Dashboard" },
@@ -33,6 +38,8 @@ export default function Sidebar({
   setIsDesktopCollapsed,
 }: Props) {
   const { data: user, refetch: refetchUser } = useGetUser();
+  const theme = useAppSelector((s) => s.app.theme);
+  const dis = useAppDispatch();
 
   useEffect(() => {
     const handleResize = () => {
@@ -116,20 +123,84 @@ export default function Sidebar({
 
         {/* Sidebar Footer */}
         <div
-          className={`absolute bottom-0 w-full p-4 border-t border-base-300 flex items-center ${
-            isDesktopCollapsed ? "lg:justify-center" : "gap-3"
+          className={`absolute bottom-0 w-full p-4 border-t border-base-300 ${
+            isDesktopCollapsed
+              ? "lg:flex-col lg:items-center lg:gap-4"
+              : " flex items-center justify-between "
           }`}
         >
-          <div className="avatar placeholder">
-            <img
-              src="/images/user-avatar.webp"
-              className="rounded-full size-10"
-              alt="User Avatar"
-            />
+          <div
+            className={`flex items-center ${isDesktopCollapsed ? "lg:justify-center" : "gap-3"}`}
+          >
+            <div className="avatar placeholder">
+              <img
+                src="/images/user-avatar.webp"
+                className="rounded-full size-10"
+                alt="User Avatar"
+              />
+            </div>
+            <div className={`${isDesktopCollapsed ? "lg:hidden" : ""}`}>
+              <p className="text-sm font-semibold">{user.name}</p>
+              <p className="text-xs opacity-60">Admin</p>
+            </div>
           </div>
-          <div className={`${isDesktopCollapsed ? "lg:hidden" : ""}`}>
-            <p className="text-sm font-semibold">{user.name}</p>
-            <p className="text-xs opacity-60">Admin</p>
+
+          {/* Action Buttons */}
+          <div
+            className={`flex ${
+              isDesktopCollapsed
+                ? "lg:flex-col lg:items-center lg:gap-2"
+                : "justify-end gap-1"
+            }`}
+          >
+            {/* Theme Toggle */}
+            <button
+              onClick={() => {
+                const newTheme = theme === "dark" ? "light" : "dark";
+                storage.setTheme(newTheme);
+                dis(
+                  appActions.setTheme({
+                    theme: newTheme,
+                  }),
+                );
+              }}
+              className="btn btn-sm btn-ghost btn-circle"
+              aria-label="Toggle theme"
+              title="تغییر تم"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
+            </button>
+
+            {/* Settings */}
+            <button
+              onClick={() => {
+                // Navigate to settings or open settings modal
+                // You can use react-router's navigate or your preferred method
+                console.log("Open settings");
+              }}
+              className="btn btn-sm btn-ghost btn-circle"
+              aria-label="Settings"
+              title="تنظیمات"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+
+            {/* Logout */}
+            <button
+              onClick={() => {
+                storage.clearTokens();
+                dis(authActions.logout());
+              }}
+              className="btn btn-sm btn-ghost btn-circle text-error"
+              aria-label="Logout"
+              title="خروج"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </aside>

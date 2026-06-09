@@ -1,41 +1,15 @@
-import { formatCurrency, formatNumber } from "../../../Utils/AppUtils";
-import { useNavigate } from "react-router";
+import { formatNumber } from "../../../Utils/AppUtils";
 import { useGetProducts } from "../../../Features/Product/ProductApi";
 import LoadingSpinner from "../../../Components/Utils/LoadingSpinner";
 import { useState } from "react";
 import { AlignJustify, Grid3X3, Search } from "lucide-react";
-
-const getStatusBadge = (status: string): { cls: string; label: string } => {
-  switch (status) {
-    case "active":
-      return { cls: "badge-success", label: "فعال" };
-    case "inactive":
-      return { cls: "badge-error", label: "ناموجود" };
-    case "draft":
-      return { cls: "badge-warning", label: "پیش‌نویس" };
-
-    default:
-      return { cls: "", label: "" };
-  }
-};
-
-const getStockLevel = (
-  stock: number,
-  minStock: number,
-): { cls: string; label: string } => {
-  if (stock === 0) return { cls: "text-error font-bold", label: "ناموجود" };
-  if (stock <= minStock)
-    return { cls: "text-warning font-semibold", label: "کمبود" };
-  return { cls: "text-success", label: "موجود" };
-};
-
-const getProfitMargin = (price: number, cost: number): number => {
-  if (price === 0) return 0;
-  return Math.round(((price - cost) / price) * 100);
-};
+import ProductCreate from "../Components/ProductCreate";
+import ProductsTableView from "../Components/ProductsTableView";
+import ProductsGridView from "../Components/ProductsGridView";
 
 export default function ProductList() {
-  const navigate = useNavigate();
+  const [modalsKey, setModalsKey] = useState(0);
+  const [isOpenCreate, setIsOpenCreate] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "all" | "active" | "inactive" | "draft"
@@ -81,12 +55,19 @@ export default function ProductList() {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
+  const handleOpenCreate = () => {
+    setIsOpenCreate(true);
+  };
+  const handleCloseCreate = () => {
+    setIsOpenCreate(false);
+    setModalsKey((val) => val + 1);
+  };
+
   return (
     <>
       <div className="card bg-base-100 shadow-sm overflow-hidden h-full">
         <div className="card-body p-4 overflow-y-auto">
           {/* Toolbar */}
-
           <div className="border-b border-base-200 pb-4">
             <div className="flex flex-col gap-4">
               {/* Search - Full Width */}
@@ -102,7 +83,10 @@ export default function ProductList() {
                   />
                 </div>
 
-                <button className="btn btn-primary btn-sm">
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={handleOpenCreate}
+                >
                   {" + افزودن محصول"}
                 </button>
               </div>
@@ -221,259 +205,10 @@ export default function ProductList() {
 
           {/* Table View */}
           {viewMode === "table" ? (
-            <div className="overflow-x-auto">
-              <table className="table table-sm">
-                <thead>
-                  <tr className="bg-base-200/50">
-                    <th className="rounded-none">محصول</th>
-                    <th>دسته‌بندی</th>
-                    <th>قیمت</th>
-                    <th>حاشیه سود</th>
-                    <th>موجودی</th>
-                    <th>فروش</th>
-                    <th>وضعیت</th>
-                    <th className="rounded-none"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredProducts.map((product) => {
-                    const badge = getStatusBadge(product.status);
-                    const stock = getStockLevel(
-                      product.stock,
-                      product.minStock,
-                    );
-                    const margin = getProfitMargin(
-                      product.price,
-                      product.costPrice,
-                    );
-
-                    return (
-                      <tr key={product.id} className="hover cursor-pointer">
-                        <td>
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center text-xl">
-                              {product.image}
-                            </div>
-                            <div>
-                              <p className="font-medium text-sm max-w-[250px] truncate">
-                                {product.name}
-                              </p>
-                              <p
-                                className="text-xs text-base-content/50 font-mono"
-                                dir="ltr"
-                              >
-                                {product.sku}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <span className="badge badge-ghost badge-sm">
-                            {product.category}
-                          </span>
-                        </td>
-                        <td className="text-sm font-medium text-primary whitespace-nowrap">
-                          {formatCurrency(product.price)}
-                        </td>
-                        <td>
-                          <span
-                            className={`text-sm font-medium ${
-                              margin >= 25
-                                ? "text-success"
-                                : margin >= 15
-                                  ? "text-warning"
-                                  : "text-error"
-                            }`}
-                          >
-                            {margin}٪
-                          </span>
-                        </td>
-                        <td>
-                          <div className="flex flex-col items-start">
-                            <span className={`text-sm ${stock.cls}`}>
-                              {formatNumber(product.stock)}
-                            </span>
-                            <span className="text-[10px] text-base-content/40">
-                              حداقل: {formatNumber(product.minStock)}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="text-sm font-medium">
-                          {formatNumber(product.sold)}
-                        </td>
-                        <td>
-                          <span className={`badge badge-sm ${badge.cls}`}>
-                            {badge.label}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="dropdown dropdown-left">
-                            <label
-                              tabIndex={0}
-                              className="btn btn-ghost btn-xs btn-circle"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                              </svg>
-                            </label>
-                            <ul
-                              tabIndex={0}
-                              className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-44 border border-base-200"
-                            >
-                              <li>
-                                <a
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/Products/${product.id}`);
-                                  }}
-                                >
-                                  مشاهده جزئیات
-                                </a>
-                              </li>
-                              <li>
-                                <a onClick={(e) => e.stopPropagation()}>
-                                  ویرایش محصول
-                                </a>
-                              </li>
-                              <li>
-                                <a onClick={(e) => e.stopPropagation()}>
-                                  تاریخچه فروش
-                                </a>
-                              </li>
-                              <li>
-                                <a onClick={(e) => e.stopPropagation()}>
-                                  تنظیم موجودی
-                                </a>
-                              </li>
-                              <li>
-                                <a onClick={(e) => e.stopPropagation()}>
-                                  تغییر قیمت
-                                </a>
-                              </li>
-                              <li>
-                                <a
-                                  className="text-error"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  حذف محصول
-                                </a>
-                              </li>
-                            </ul>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <ProductsTableView products={filteredProducts} />
           ) : (
             /* Grid View */
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 p-4">
-              {filteredProducts.map((product) => {
-                const badge = getStatusBadge(product.status);
-                const stock = getStockLevel(product.stock, product.minStock);
-                const margin = getProfitMargin(
-                  product.price,
-                  product.costPrice,
-                );
-
-                return (
-                  <div
-                    key={product.id}
-                    className="card bg-base-50 border border-base-200 hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => navigate(`/Products/${product.id}`)}
-                  >
-                    <div className="card-body p-4">
-                      {/* Image & Status */}
-                      <div className="flex items-start justify-between">
-                        <div className="w-14 h-14 rounded-xl bg-base-200 flex items-center justify-center text-3xl">
-                          {product.image}
-                        </div>
-                        <span className={`badge badge-sm ${badge.cls}`}>
-                          {badge.label}
-                        </span>
-                      </div>
-
-                      {/* Info */}
-                      <h3 className="font-bold text-sm mt-2 line-clamp-2 leading-relaxed">
-                        {product.name}
-                      </h3>
-                      <p
-                        className="text-xs text-base-content/50 font-mono"
-                        dir="ltr"
-                      >
-                        {product.sku}
-                      </p>
-
-                      {/* Stats Grid */}
-                      <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
-                        <div className="bg-base-100 rounded-lg p-2 text-center">
-                          <p className="text-base-content/40">قیمت</p>
-                          <p className="font-bold text-primary text-sm mt-0.5">
-                            {formatCurrency(product.price)}
-                          </p>
-                        </div>
-                        <div className="bg-base-100 rounded-lg p-2 text-center">
-                          <p className="text-base-content/40">فروش</p>
-                          <p className="font-bold text-sm mt-0.5">
-                            {formatNumber(product.sold)} عدد
-                          </p>
-                        </div>
-                        <div className="bg-base-100 rounded-lg p-2 text-center">
-                          <p className="text-base-content/40">موجودی</p>
-                          <p
-                            className={`font-bold text-sm mt-0.5 ${stock.cls}`}
-                          >
-                            {product.stock === 0
-                              ? "ناموجود"
-                              : formatNumber(product.stock)}
-                          </p>
-                        </div>
-                        <div className="bg-base-100 rounded-lg p-2 text-center">
-                          <p className="text-base-content/40">حاشیه سود</p>
-                          <p
-                            className={`font-bold text-sm mt-0.5 ${
-                              margin >= 25
-                                ? "text-success"
-                                : margin >= 15
-                                  ? "text-warning"
-                                  : "text-error"
-                            }`}
-                          >
-                            {margin}٪
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="card-actions justify-end mt-3">
-                        <button
-                          className="btn btn-ghost btn-xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/Products/${product.id}`);
-                          }}
-                        >
-                          جزئیات
-                        </button>
-                        <button
-                          className="btn btn-primary btn-xs"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          ویرایش
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ProductsGridView products={filteredProducts} />
           )}
 
           {/* Empty State */}
@@ -514,6 +249,12 @@ export default function ProductList() {
           )}
         </div>
       </div>
+
+      <ProductCreate
+        key={`modal_${modalsKey}`}
+        isOpen={isOpenCreate}
+        onClose={handleCloseCreate}
+      />
     </>
   );
 }

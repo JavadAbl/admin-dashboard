@@ -8,8 +8,8 @@ import { toast } from "sonner";
 
 export default function LoginPage() {
   const dis = useAppDispatch();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("123456");
   const [error, setError] = useState("");
 
   const { mutate: mutateAuthAction, isPending: loading } = useAuthAction();
