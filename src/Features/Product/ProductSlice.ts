@@ -1,14 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { customerReducers } from "./ProductReducers";
+import { productReducers } from "./ProductReducers";
 
 export type ProductState = object;
 
 const initialState: ProductState = {};
 
-export const customerSlice = createSlice({
+export const productSlice = createSlice({
   name: "product",
   initialState,
-  reducers: customerReducers,
+  reducers: productReducers,
 });
 
-export const customerActions = customerSlice.actions;
+export const productActions = productSlice.actions;

@@ -1,19 +1,32 @@
-import type { Product } from "../../../Features/Product/CustomerTypes/ProductType";
-import { formatNumber } from "../../../Utils/AppUtils";
+import { formatCurrency, formatNumber } from "../../../Utils/AppUtils";
 import { cn } from "../../../Utils/Cn";
 
-interface StockAlertCardProps {
-  products: Product[];
+interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  customerName: string;
+  total: number;
+  status: "paid" | "unpaid" | "overdue" | "cancelled";
+  dueDate: string;
+  daysOverdue?: number;
 }
 
-export default function ProductsStockAlertCard({
-  products,
-}: StockAlertCardProps) {
-  const lowStock = products
-    .filter((p) => p.stock <= p.minStock && p.status !== "draft")
-    .sort((a, b) => a.stock - b.stock);
+interface OverdueAlertCardProps {
+  invoices: Invoice[];
+}
 
-  if (lowStock.length === 0) return null;
+export default function SalesOverdueAlertCard({
+  invoices,
+}: OverdueAlertCardProps) {
+  const overdueInvoices = invoices
+    .filter((inv) => inv.status === "overdue" || inv.status === "unpaid")
+    .sort((a, b) => {
+      const aDays = a.daysOverdue ?? 0;
+      const bDays = b.daysOverdue ?? 0;
+      return bDays - aDays;
+    });
+
+  if (overdueInvoices.length === 0) return null;
 
   return (
     <div className="card bg-base-100 shadow-sm border border-base-300">
@@ -25,21 +38,21 @@ export default function ProductsStockAlertCard({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75" />
               <span className="relative inline-flex rounded-full h-3 w-3 bg-error" />
             </span>
-            هشدار موجودی
+            فاکتورهای معوق
           </h2>
           <span className="badge badge-error badge-outline badge-sm">
-            {formatNumber(lowStock.length)} کالا
+            {formatNumber(overdueInvoices.length)} فاکتور
           </span>
         </div>
 
-        {/* List - Added max-height and scroll for overflow */}
+        {/* List */}
         <div className="space-y-2 max-h-80 overflow-y-auto scroll-py-2">
-          {lowStock.map((product) => (
+          {overdueInvoices.map((invoice) => (
             <div
-              key={product.id}
+              key={invoice.id}
               className={cn(
                 "flex items-center justify-between p-2.5 rounded-box transition-colors",
-                product.stock === 0
+                invoice.status === "overdue"
                   ? "bg-error/5 hover:bg-error/10 border border-error/10"
                   : "bg-base-200 hover:bg-base-300 border border-base-300",
               )}
@@ -47,31 +60,25 @@ export default function ProductsStockAlertCard({
               <div className="flex items-center gap-3 min-w-0">
                 {/* Avatar with Fallback */}
                 <div className="avatar placeholder">
-                  <div className="w-10 h-10 rounded-box mask mask-squircle bg-base-300">
-                    {product.image ? (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="object-cover"
-                      />
-                    ) : (
-                      <span className="text-base-content/50 text-xs">N/A</span>
-                    )}
+                  <div className="w-10 h-10 rounded-box mask mask-squircle bg-base-300 flex items-center justify-center text-lg">
+                    {invoice.status === "overdue" ? "🔴" : "🟡"}
                   </div>
                 </div>
 
-                {/* Product Info - Added flex-1 min-w-0 for truncation to work */}
+                {/* Invoice Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{product.name}</p>
+                  <p className="font-medium text-sm truncate">
+                    {invoice.customerName}
+                  </p>
                   <p className="text-xs text-base-content/50 font-mono tracking-tighter">
-                    {product.sku}
+                    {invoice.invoiceNumber} · {invoice.dueDate}
                   </p>
                 </div>
               </div>
 
-              {/* Stock Badge */}
-              <div className="flex-shrink-0 ms-3">
-                {product.stock === 0 ? (
+              {/* Overdue Badge / Amount */}
+              <div className="flex-shrink-0 ms-3 text-left">
+                {invoice.status === "overdue" && invoice.daysOverdue ? (
                   <span className="badge badge-error badge-sm gap-1">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -85,10 +92,10 @@ export default function ProductsStockAlertCard({
                         clipRule="evenodd"
                       />
                     </svg>
-                    ناموجود
+                    {formatNumber(invoice.daysOverdue)} روز معوق
                   </span>
                 ) : (
-                  <span className="badge badge-warning badge-sm font-mono gap-1">
+                  <span className="badge badge-warning badge-sm gap-1">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
@@ -101,9 +108,12 @@ export default function ProductsStockAlertCard({
                         clipRule="evenodd"
                       />
                     </svg>
-                    {formatNumber(product.stock)} عدد
+                    در انتظار
                   </span>
                 )}
+                <p className="text-xs font-semibold text-base-content/70 mt-1">
+                  {formatCurrency(invoice.total)}
+                </p>
               </div>
             </div>
           ))}

@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router";
 import { useGetProducts } from "../../../Features/Product/ProductApi";
 import LoadingSpinner from "../../../Components/Utils/LoadingSpinner";
@@ -30,8 +29,9 @@ export default function ProductsTopSelling() {
             >
               <div className="relative">
                 <div className="w-12 h-12 rounded-lg bg-base-200 flex items-center justify-center text-2xl">
-                  {product.image}
+                  <img src={product.image} />
                 </div>
+
                 <div
                   className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white ${
                     index === 0
@@ -44,6 +44,7 @@ export default function ProductsTopSelling() {
                   {index + 1}
                 </div>
               </div>
+
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm truncate">{product.name}</p>
                 <p className="text-xs text-base-content/50">

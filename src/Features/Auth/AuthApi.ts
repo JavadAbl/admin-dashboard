@@ -3,7 +3,7 @@ import { apiClient } from "../../Utils/Api/BaseApi";
 import type { AxiosError, AxiosResponse } from "axios";
 import type { User } from "./AuthTypes/UserType";
 import type { Auth } from "./AuthTypes/AuthType";
-import { MockData } from "../../Utils/Api/MockData";
+import { MockData } from "../../Utils/Api/MockData/MockData";
 
 export const authQueryKeys = {
   user: () => ["user"] as const,

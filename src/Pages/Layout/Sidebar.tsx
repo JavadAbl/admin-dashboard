@@ -11,6 +11,28 @@ import { appActions } from "../../Features/App/AppSlice";
 
 const menuItems: SidebarMenuItemType[] = [
   { name: "داشبورد", icon: "📊", path: "/Dashboard" },
+
+  {
+    name: "فروش",
+    icon: "💰",
+    children: [
+      { name: "مرور فاکتورها", icon: "📊", path: "/Sales" },
+      {
+        name: "گزارشات",
+        icon: "📈",
+        children: [
+          { name: "فاکتورها", icon: "📋", path: "/Sales/Reports/Returns" },
+          { name: "برگشت از خرید", icon: "↩️", path: "/Sales/Reports/Returns" },
+          {
+            name: "پیش فاکتورها",
+            icon: "📄",
+            path: "/Sales/Reports/PreInvoices",
+          },
+        ],
+      },
+    ],
+  },
+
   {
     name: "محصول",
     icon: "🛍️",
@@ -19,12 +41,15 @@ const menuItems: SidebarMenuItemType[] = [
       { name: "لیست محصولات", icon: "📦", path: "/Products/List" },
     ],
   },
+
   {
     name: "مشتریان",
     icon: "👥",
     path: "/Customers",
   },
+
   { name: "تنضیمات", icon: "⚙️", path: "/Settings" },
+
   { name: "پیام ها", icon: "✉️", badge: 4, path: "/Messages" },
 ];
 
@@ -123,7 +148,7 @@ export default function Sidebar({
 
         {/* Sidebar Footer */}
         <div
-          className={`absolute bottom-0 w-full p-4 border-t border-base-300 ${
+          className={`absolute bottom-0 w-full p-4 border-t border-base-300 bg-base-200 ${
             isDesktopCollapsed
               ? "lg:flex-col lg:items-center lg:gap-4"
               : " flex items-center justify-between "

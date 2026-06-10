@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { MockData } from "../../Utils/Api/MockData";
+import { MockData } from "../../Utils/Api/MockData/MockData";
 import type { KpiData } from "./AppTypes/KpiDataType";
 import type { RecentOrder } from "./AppTypes/RecentOrderType";
 import type { TopProduct } from "./AppTypes/TopProductType";

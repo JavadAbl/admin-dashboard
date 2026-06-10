@@ -1,15 +1,20 @@
 import React from "react";
 import { formatCurrency, formatNumber } from "../../Utils/AppUtils";
-import { MockData } from "../../Utils/Api/MockData";
+import { MockData } from "../../Utils/Api/MockData/MockData";
 import { CategorySales } from "../../Features/Product/ProductEnums/CategoriesEnum";
 import ProductsStockAlertCard from "./Components/ProductsStockAlertCard";
 import ProductsCategoryChart from "./Components/ProductsCategoryChart";
 import ProductsTopSelling from "./Components/ProductsTopSelling";
 import ProductsStateCard from "./Components/ProductsStateCard";
+import { useGetProducts } from "../../Features/Product/ProductApi";
+import LoadingSpinner from "../../Components/Utils/LoadingSpinner";
 
 // ============ Main Component ============
 const ProductsPage: React.FC = () => {
-  const mockProducts = MockData.products;
+  const { data: mockProducts, isLoading } = useGetProducts();
+
+  if (isLoading) return <LoadingSpinner centerScreen />;
+  if (!mockProducts) return null;
 
   // Derived stats
   const totalProducts = 156;
@@ -27,7 +32,7 @@ const ProductsPage: React.FC = () => {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold">محصولات</h1>
           <p className="text-sm text-base-content/60 mt-1">
@@ -55,7 +60,7 @@ const ProductsPage: React.FC = () => {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
         <ProductsStateCard
           title="کل محصولات"
           value={formatNumber(totalProducts)}
@@ -87,7 +92,7 @@ const ProductsPage: React.FC = () => {
       </div>
 
       {/* Top Selling & Stock Alerts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
         {/* Top Selling */}
         <ProductsTopSelling />
 

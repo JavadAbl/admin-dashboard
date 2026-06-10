@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { MockData } from "../../Utils/Api/MockData";
+import { MockData } from "../../Utils/Api/MockData/MockData";
 import type { Customer } from "./CustomerTypes/CustomerType";
 
 export const customerQueryKeys = {

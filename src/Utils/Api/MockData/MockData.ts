@@ -1,3 +1,6 @@
+import { invoicesMock } from "./InvoicesMock";
+import { productOrderHistory } from "./ProductOrderHistoryMock";
+
 export const MockData = {
   login: [
     {
@@ -283,7 +286,7 @@ export const MockData = {
       minStock: 5,
       sold: 142,
       status: "active",
-      image: "📱",
+      image: "/images/products/mobile.webp",
       brand: "سامسونگ",
       createdAt: "2024-01-10",
     },
@@ -298,7 +301,7 @@ export const MockData = {
       minStock: 3,
       sold: 67,
       status: "active",
-      image: "💻",
+      image: "/images/products/laptop.webp",
       brand: "اپل",
       createdAt: "2024-01-08",
     },
@@ -313,7 +316,7 @@ export const MockData = {
       minStock: 10,
       sold: 198,
       status: "active",
-      image: "🎧",
+      image: "/images/products/headphone.webp",
       brand: "سونی",
       createdAt: "2023-12-20",
     },
@@ -328,7 +331,7 @@ export const MockData = {
       minStock: 5,
       sold: 53,
       status: "active",
-      image: "⌚",
+      image: "/images/products/watch.webp",
       brand: "اپل",
       createdAt: "2024-01-05",
     },
@@ -343,7 +346,7 @@ export const MockData = {
       minStock: 5,
       sold: 34,
       status: "inactive",
-      image: "📲",
+      image: "/images/products/tablet.webp",
       brand: "سامسونگ",
       createdAt: "2023-11-15",
     },
@@ -358,7 +361,7 @@ export const MockData = {
       minStock: 15,
       sold: 215,
       status: "active",
-      image: "🔊",
+      image: "/images/products/speaker.webp",
       brand: "JBL",
       createdAt: "2023-10-22",
     },
@@ -373,7 +376,7 @@ export const MockData = {
       minStock: 2,
       sold: 18,
       status: "active",
-      image: "📷",
+      image: "/images/products/camera.webp",
       brand: "کانن",
       createdAt: "2023-09-10",
     },
@@ -388,7 +391,7 @@ export const MockData = {
       minStock: 20,
       sold: 310,
       status: "active",
-      image: "🖱️",
+      image: "/images/products/mouse.webp",
       brand: "لاجیتک",
       createdAt: "2023-08-05",
     },
@@ -403,7 +406,7 @@ export const MockData = {
       minStock: 3,
       sold: 42,
       status: "active",
-      image: "🖥️",
+      image: "/images/products/monitor.webp",
       brand: "ال‌جی",
       createdAt: "2024-01-12",
     },
@@ -418,9 +421,13 @@ export const MockData = {
       minStock: 10,
       sold: 0,
       status: "draft",
-      image: "⌨️",
+      image: "/images/products/keyboard.webp",
       brand: "ریزر",
       createdAt: "2024-01-15",
     },
   ],
+
+  productOrderHistory,
+
+  invoicesMock,
 };

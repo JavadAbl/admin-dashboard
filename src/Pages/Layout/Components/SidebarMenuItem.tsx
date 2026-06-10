@@ -83,7 +83,7 @@ export default function SidebarMenuItem({ item, isDesktopCollapsed }: Props) {
           to={item.path!}
           className={cn(
             "flex items-center rounded-btn",
-            isActive ? "text-white bg-primary" : "hover:bg-base-200",
+            isActive ? "text-white bg-primary/90" : "hover:bg-base-200",
             isDesktopCollapsed && "lg:justify-center",
           )}
         >

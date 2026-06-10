@@ -6,11 +6,12 @@ interface Props extends React.ComponentProps<"div"> {
 }
 export default function LoadingSpinner({ centerScreen = false }: Props) {
   return (
-    <span
+    <div
       className={cn(
-        "loading loading-ring loading-xl",
-        centerScreen && "block h-screen w-screen",
+        centerScreen && " h-full w-full flex justify-center items-center",
       )}
-    />
+    >
+      <span className={cn("loading loading-ring loading-xl")} />
+    </div>
   );
 }

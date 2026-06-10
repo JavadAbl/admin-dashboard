@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { MockData } from "../../../Utils/Api/MockData";
+import { MockData } from "../../../Utils/Api/MockData/MockData";
 import {
   formatCurrency,
   formatNumber,

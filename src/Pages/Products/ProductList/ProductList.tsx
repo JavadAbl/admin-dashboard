@@ -198,10 +198,8 @@ export default function ProductList() {
             </div>
           </div>
 
-          {/* Results Count */}
-          <div className="px-4 py-2 bg-base-200/30 text-xs text-base-content/50">
-            نمایش {formatNumber(filteredProducts.length)} محصول
-          </div>
+          {/* Divider */}
+          <div className="h-px bg-base-300" />
 
           {/* Table View */}
           {viewMode === "table" ? (

@@ -39,7 +39,7 @@ export default function ProductsGridView({ products }: Props) {
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 p-4">
+    <div className=" grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-4">
       {products.map((product) => {
         const badge = getStatusBadge(product.status);
         const stock = getStockLevel(product.stock, product.minStock);
@@ -48,15 +48,15 @@ export default function ProductsGridView({ products }: Props) {
         return (
           <div
             key={product.id}
-            className="card bg-base-50 border border-base-200 hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => navigate(`/Products/${product.id}`)}
+            className="card bg-base-200 shadow-md hover:shadow-inner shadow-primary/25 border border-base-300 transition-shadow "
           >
             <div className="card-body p-4">
               {/* Image & Status */}
               <div className="flex items-start justify-between">
                 <div className="w-14 h-14 rounded-xl bg-base-200 flex items-center justify-center text-3xl">
-                  {product.image}
+                  <img className="rounded-full" src={product.image} />
                 </div>
+
                 <span className={`badge badge-sm ${badge.cls}`}>
                   {badge.label}
                 </span>
@@ -113,18 +113,17 @@ export default function ProductsGridView({ products }: Props) {
                 <button
                   className="btn btn-ghost btn-xs"
                   onClick={(e) => {
-                    e.stopPropagation();
                     navigate(`/Products/${product.id}`);
                   }}
                 >
                   جزئیات
                 </button>
-                <button
+                {/*   <button
                   className="btn btn-primary btn-xs"
                   onClick={(e) => e.stopPropagation()}
                 >
                   ویرایش
-                </button>
+                </button> */}
               </div>
             </div>
           </div>
