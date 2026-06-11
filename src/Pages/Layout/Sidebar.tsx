@@ -18,19 +18,6 @@ const menuItems: SidebarMenuItemType[] = [
     children: [
       { name: "مرور فاکتورها", icon: "📊", path: "/Sales" },
       { name: "فاکتورها", icon: "📋", path: "/Sales/Invoices" },
-      {
-        name: "گزارشات",
-        icon: "📈",
-        children: [
-          { name: "فاکتورها", icon: "📋", path: "/Sales/Reports/Returns" },
-          { name: "برگشت از خرید", icon: "↩️", path: "/Sales/Reports/Returns" },
-          {
-            name: "پیش فاکتورها",
-            icon: "📄",
-            path: "/Sales/Reports/PreInvoices",
-          },
-        ],
-      },
     ],
   },
 

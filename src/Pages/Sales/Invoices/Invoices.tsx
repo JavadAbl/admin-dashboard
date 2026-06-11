@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlignJustify, Grid3X3, Search, Plus } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import { formatNumber } from "../../../Utils/AppUtils";
 import InvoicesTableView from "./Components/InvoicesTableView";
 import InvoiceCreate from "./Components/InvoiceCreate";
@@ -19,9 +19,6 @@ export default function Invoices() {
   const { data: invoices } = useGetInvoices();
   if (!invoices) return null;
 
-  // Unique customers (for potential filter)
-  const customers = [...new Set(invoices.map((inv) => inv.customerName))];
-
   // Filtered & sorted
   const filteredInvoices = invoices
     .filter((inv) => {
@@ -40,17 +37,6 @@ export default function Invoices() {
       return b.invoiceNumber.localeCompare(a.invoiceNumber);
     });
 
-  // Stats
-  const totalRevenue = filteredInvoices
-    .filter((inv) => inv.status === "paid")
-    .reduce((sum, inv) => sum + inv.total, 0);
-  const totalUnpaid = filteredInvoices
-    .filter((inv) => inv.status === "unpaid" || inv.status === "overdue")
-    .reduce((sum, inv) => sum + inv.total, 0);
-  const overdueCount = filteredInvoices.filter(
-    (inv) => inv.status === "overdue",
-  ).length;
-
   const handleOpenCreate = () => {
     setIsOpenCreate(true);
   };
@@ -63,42 +49,6 @@ export default function Invoices() {
     <>
       <div className="card bg-base-100 shadow-sm overflow-hidden h-full">
         <div className="card-body p-4 overflow-y-auto">
-          {/* ── Summary Stats ── */}
-          {/*  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-2">
-            <div className="stat bg-primary/5 rounded-box shadow-sm p-3">
-              <div className="flex items-center gap-2 text-base-content/60">
-                <span className="text-xs">کل فاکتورها</span>
-              </div>
-              <div className="text-lg font-bold text-primary">
-                {formatNumber(filteredInvoices.length)}
-              </div>
-            </div>
-            <div className="stat bg-success/5 rounded-box shadow-sm p-3">
-              <div className="flex items-center gap-2 text-base-content/60">
-                <span className="text-xs">درآمد پرداخت‌شده</span>
-              </div>
-              <div className="text-lg font-bold text-success">
-                {totalRevenue.toLocaleString("fa-IR")} تومان
-              </div>
-            </div>
-            <div className="stat bg-warning/5 rounded-box shadow-sm p-3">
-              <div className="flex items-center gap-2 text-base-content/60">
-                <span className="text-xs">مبالغ پرداخت‌نشده</span>
-              </div>
-              <div className="text-lg font-bold text-warning">
-                {totalUnpaid.toLocaleString("fa-IR")} تومان
-              </div>
-            </div>
-            <div className="stat bg-error/5 rounded-box shadow-sm p-3">
-              <div className="flex items-center gap-2 text-base-content/60">
-                <span className="text-xs">سررسید گذشته</span>
-              </div>
-              <div className="text-lg font-bold text-error">
-                {formatNumber(overdueCount)} فاکتور
-              </div>
-            </div>
-          </div> */}
-
           {/* ── Toolbar ── */}
           <div className="border-b border-base-200 pb-4">
             <div className="flex flex-col gap-4">

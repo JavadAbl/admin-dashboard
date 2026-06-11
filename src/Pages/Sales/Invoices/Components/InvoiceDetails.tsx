@@ -19,87 +19,17 @@ import {
   ShoppingCart,
   Package,
 } from "lucide-react";
-import type { Invoice, InvoiceStatus } from "./InvoiceTypes";
+import { useNavigate, useParams } from "react-router";
+import type {
+  Invoice,
+  InvoiceStatus,
+} from "../../../../Features/Sale/SaleTypes/InvoiceType";
 import {
   formatCurrency,
   formatNumber,
   toPersianDate,
-} from "../../../Utils/AppUtils";
-import { useNavigate, useParams } from "react-router";
-
-// ── Mock data (replace with real API hook) ──
-const MOCK_INVOICES: Invoice[] = [
-  {
-    id: "inv-1",
-    invoiceNumber: "INV-1404-0001",
-    customerName: "شرکت آلفا سیستم",
-    customerId: "cust-1",
-    items: [
-      {
-        id: "item-1-1",
-        productName: "گوشی موبایل سامسونگ Galaxy S24",
-        productId: "prod-1",
-        quantity: 2,
-        unitPrice: 68500000,
-        discount: 5,
-        total: 130150000,
-      },
-      {
-        id: "item-1-2",
-        productName: "هدفون بی‌سیم Sony WH-1000XM5",
-        productId: "prod-2",
-        quantity: 3,
-        unitPrice: 18500000,
-        discount: 10,
-        total: 49950000,
-      },
-      {
-        id: "item-1-3",
-        productName: "شارژر سریع ۶۵ وات انکر",
-        productId: "prod-3",
-        quantity: 5,
-        unitPrice: 2850000,
-        discount: 0,
-        total: 14250000,
-      },
-    ],
-    subtotal: 194350000,
-    tax: 15720000,
-    discount: 5000000,
-    total: 205070000,
-    status: "paid",
-    date: new Date(2025, 2, 1).toISOString(),
-    dueDate: new Date(2025, 2, 16).toISOString(),
-    paidAt: new Date(2025, 2, 5).toISOString(),
-    note: "فاکتور ویژه تخفیف دوره‌ای",
-  },
-  {
-    id: "inv-2",
-    invoiceNumber: "INV-1404-0003",
-    customerName: "فروشگاه دیجیتال برتر",
-    customerId: "cust-2",
-    items: [
-      {
-        id: "item-2-1",
-        productName: "لپ‌تاپ ایسوس ZenBook 14",
-        productId: "prod-4",
-        quantity: 1,
-        unitPrice: 125000000,
-        discount: 3,
-        total: 121250000,
-      },
-    ],
-    subtotal: 125000000,
-    tax: 11250000,
-    discount: 0,
-    total: 136250000,
-    status: "overdue",
-    date: new Date(2025, 1, 15).toISOString(),
-    dueDate: new Date(2025, 1, 28).toISOString(),
-    daysOverdue: 42,
-    note: undefined,
-  },
-];
+} from "../../../../Utils/AppUtils";
+import { useGetInvoices } from "../../../../Features/Sale/SaleApi";
 
 const statusConfig: Record<
   InvoiceStatus,
@@ -131,18 +61,18 @@ export default function InvoiceDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // Replace with: const { data: invoices } = useGetInvoices();
-  const invoices = MOCK_INVOICES;
-  const invoice = invoices.find((item) => item.id === id);
+  const { data: invoices } = useGetInvoices();
 
-  if (!invoice) {
+  const invoice = invoices?.find((item) => item.id === id);
+
+  if (!invoices || !invoice) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-base-content/40">
         <FileText size={48} className="mb-4" />
         <p className="font-medium">فاکتور یافت نشد</p>
         <button
           className="btn btn-ghost btn-sm mt-4"
-          onClick={() => navigate("/Invoices/List")}
+          onClick={() => navigate("/Sales/Invoices")}
         >
           <ArrowLeft size={16} />
           بازگشت به لیست
@@ -169,15 +99,6 @@ export default function InvoiceDetails() {
               <h1 className="text-2xl font-bold text-base-content">
                 جزئیات فاکتور
               </h1>
-              <p className="text-sm text-base-content/60 flex items-center gap-2">
-                <span className="font-mono" dir="ltr">
-                  {invoice.invoiceNumber}
-                </span>
-                <span className={`badge ${currentStatus.color} gap-1`}>
-                  {currentStatus.icon}
-                  {currentStatus.label}
-                </span>
-              </p>
             </div>
           </div>
 
@@ -209,9 +130,7 @@ export default function InvoiceDetails() {
                   <a
                     className="gap-2"
                     onClick={() =>
-                      navigator.clipboard?.writeText(
-                        invoice.invoiceNumber,
-                      )
+                      navigator.clipboard?.writeText(invoice.invoiceNumber)
                     }
                   >
                     <Copy size={16} />
@@ -233,7 +152,7 @@ export default function InvoiceDetails() {
             <button className="btn btn-ghost btn-circle btn-sm">
               <ArrowLeft
                 size={20}
-                onClick={() => navigate("/Invoices/List")}
+                onClick={() => navigate("/Sales/Invoices")}
               />
             </button>
           </div>
@@ -352,16 +271,13 @@ export default function InvoiceDetails() {
             {/* Overdue Warning */}
             {isOverdue && (
               <div className="flex items-center gap-3 rounded-xl border border-error/30 bg-error/5 p-4">
-                <AlertTriangle
-                  size={20}
-                  className="shrink-0 text-error"
-                />
+                <AlertTriangle size={20} className="shrink-0 text-error" />
                 <div>
                   <p className="font-medium text-error">هشدار سررسید</p>
                   <p className="text-sm text-base-content/70">
                     این فاکتور{" "}
                     <span className="font-bold text-error">
-                      {formatNumber(invoice.daysOverdue)} روز
+                      {formatNumber(invoice.daysOverdue ?? 0)} روز
                     </span>{" "}
                     از سررسید گذشته است. لطفاً پیگیری لازم را انجام دهید.
                   </p>
@@ -419,9 +335,7 @@ export default function InvoiceDetails() {
                     <div className="text-xs text-base-content/60">
                       وضعیت پرداخت
                     </div>
-                    <span
-                      className={`badge ${currentStatus.color} gap-1 mt-1`}
-                    >
+                    <span className={`badge ${currentStatus.color} gap-1 mt-1`}>
                       {currentStatus.icon}
                       {currentStatus.label}
                     </span>
@@ -553,16 +467,11 @@ export default function InvoiceDetails() {
                           سررسید پرداخت
                         </div>
                       </td>
-                      <td
-                        className={
-                          isOverdue ? "text-error font-medium" : ""
-                        }
-                      >
+                      <td className={isOverdue ? "text-error font-medium" : ""}>
                         {toPersianDate(invoice.dueDate)}
                         {isOverdue && (
                           <span className="text-xs mr-2">
-                            ({formatNumber(invoice.daysOverdue)} روز
-                            تأخیر)
+                            ({formatNumber(invoice.daysOverdue ?? 0)} روز تأخیر)
                           </span>
                         )}
                       </td>
@@ -588,9 +497,7 @@ export default function InvoiceDetails() {
                         </div>
                       </td>
                       <td>
-                        <span
-                          className={`badge ${currentStatus.color} gap-1`}
-                        >
+                        <span className={`badge ${currentStatus.color} gap-1`}>
                           {currentStatus.icon}
                           {currentStatus.label}
                         </span>

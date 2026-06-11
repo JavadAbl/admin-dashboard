@@ -50,15 +50,6 @@ const getStatusBadge = (
   }
 };
 
-const getOverdueCls = (invoice: Invoice): string => {
-  if (invoice.status === "overdue" && invoice.daysOverdue) {
-    return invoice.daysOverdue > 14
-      ? "text-error font-bold"
-      : "text-warning font-semibold";
-  }
-  return "text-base-content/60";
-};
-
 interface Props {
   invoices: Invoice[];
 }
@@ -121,7 +112,7 @@ export default function InvoicesTableView({ invoices }: Props) {
                           {invoice.invoiceNumber}
                         </p>
                         {invoice.note && (
-                          <p className="text-[10px] text-base-content/40 max-w-[200px] truncate">
+                          <p className="text-[10px] text-base-content/40 max-w-50 truncate">
                             {invoice.note}
                           </p>
                         )}
@@ -212,7 +203,11 @@ export default function InvoicesTableView({ invoices }: Props) {
                       }
                     >
                       <li>
-                        <a onClick={() => navigate(`/Invoices/${invoice.id}`)}>
+                        <a
+                          onClick={() =>
+                            navigate(`/Sales/Invoices/${invoice.id}`)
+                          }
+                        >
                           <Eye size={18} />
                           مشاهده جزئیات
                         </a>

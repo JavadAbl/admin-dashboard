@@ -1,16 +1,22 @@
-import React, {
-  useRef,
-  useEffect,
-  useCallback,
-  useState,
-  useMemo,
-} from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Plus, Trash2, Receipt, User, Search } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Receipt,
+  Search,
+  X,
+  Check,
+  Package,
+  Phone,
+} from "lucide-react";
 import { useGetCustomers } from "../../../../Features/Customer/CustomerApi";
 import { useGetProducts } from "../../../../Features/Product/ProductApi";
 import { toPersianNum } from "../../../../Utils/AppUtils";
+import { cn } from "../../../../Utils/Cn";
+import Modal from "../../../../Components/Modals/Modal";
+import Input from "../../../../Components/Inputs/Input";
 
 // ============ Types ============
 interface InvoiceItemForm {
@@ -44,12 +50,13 @@ function calcItemTotal(qty: number, price: number, discountPct: number) {
 }
 
 // ============ Main Component ============
-const InvoiceCreate: React.FC<{
+export default function InvoiceCreate({
+  isOpen,
+  onClose,
+}: {
   isOpen: boolean;
   onClose: () => void;
-}> = ({ isOpen, onClose }) => {
-  const modalRef = useRef<HTMLDialogElement>(null);
-
+}) {
   const {
     register,
     handleSubmit,
@@ -64,65 +71,66 @@ const InvoiceCreate: React.FC<{
 
   const [items, setItems] = useState<InvoiceItemForm[]>([]);
   const [customerSearch, setCustomerSearch] = useState("");
-  const [itemProductSearch, setItemProductSearch] = useState<
-    Record<number, string>
-  >({});
-  const watchedNote = watch("note", "");
+  const [isCustomerOpen, setIsCustomerOpen] = useState(false);
+
+  const [productSearch, setProductSearch] = useState("");
+  const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState("");
+
   const watchedCustomerId = watch("customerId");
 
   const { data: customers } = useGetCustomers();
   const { data: products } = useGetProducts();
 
-  // Filtered customer list for search
   const filteredCustomers = useMemo(() => {
     if (!customers) return [];
     if (!customerSearch.trim()) return customers;
     const q = customerSearch.trim().toLowerCase();
     return customers.filter(
       (c) =>
-        c.name.includes(q) ||
+        c.name.toLowerCase().includes(q) ||
         c.phone.includes(q) ||
-        c.email.toLowerCase().includes(q) ||
-        c.city.includes(q),
+        c.email?.toLowerCase().includes(q) ||
+        c.city?.toLowerCase().includes(q),
     );
   }, [customers, customerSearch]);
 
-  // Selected customer object
   const selectedCustomer = useMemo(
     () => customers?.find((c) => String(c.id) === watchedCustomerId),
     [customers, watchedCustomerId],
   );
 
-  // Products available for selection (exclude already-added products)
-  const getAvailableProducts = useCallback(
-    (itemIndex: number) => {
-      if (!products) return [];
-      const addedIds = items
-        .filter((_, i) => i !== itemIndex)
-        .map((it) => it.productId);
-      const filtered = products.filter((p) => !addedIds.includes(String(p.id)));
-      const search = (itemProductSearch[itemIndex] || "").trim().toLowerCase();
-      if (!search) return filtered;
-      return filtered.filter(
+  const availableProducts = useMemo(() => {
+    if (!products) return [];
+    const addedIds = items.map((it) => it.productId);
+    let filtered = products.filter((p) => !addedIds.includes(String(p.id)));
+
+    const search = productSearch.trim().toLowerCase();
+    if (search) {
+      filtered = filtered.filter(
         (p) =>
-          p.name.includes(search) ||
-          p.sku.toLowerCase().includes(search) ||
-          p.brand.includes(search),
+          p.name.toLowerCase().includes(search) ||
+          p.sku?.toLowerCase().includes(search) ||
+          p.brand?.toLowerCase().includes(search),
       );
-    },
-    [products, items, itemProductSearch],
+    }
+    return filtered;
+  }, [products, items, productSearch]);
+
+  const selectedProductToAdd = useMemo(
+    () => products?.find((p) => String(p.id) === selectedProductId),
+    [products, selectedProductId],
   );
 
-  // Open / Close
-  useEffect(() => {
-    const modal = modalRef.current;
-    if (!modal) return;
-    if (isOpen && !modal.open) {
+  React.useEffect(() => {
+    if (isOpen) {
       reset(INITIAL_FORM);
       setItems([]);
-      modal.showModal();
-    } else if (!isOpen && modal.open) {
-      modal.close();
+      setCustomerSearch("");
+      setProductSearch("");
+      setSelectedProductId("");
+      setIsCustomerOpen(false);
+      setIsProductDropdownOpen(false);
     }
   }, [isOpen, reset]);
 
@@ -132,43 +140,32 @@ const InvoiceCreate: React.FC<{
     onClose();
   }, [onClose, reset]);
 
-  useEffect(() => {
-    const modal = modalRef.current;
-    if (!modal) return;
-    const handleCancel = (e: Event) => {
-      handleClose();
-    };
-    modal.addEventListener("cancel", handleCancel);
-    return () => modal.removeEventListener("cancel", handleCancel);
-  }, [handleClose]);
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-    if (e.target === modalRef.current) handleClose();
-  };
-
-  // ── Item management ──
-  const addItem = () => {
+  const handleAddItem = () => {
+    if (!selectedProductToAdd) {
+      toast.error("لطفاً ابتدا یک محصول انتخاب کنید");
+      return;
+    }
+    const priceNum = parseFloat(String(selectedProductToAdd.price)) || 0;
     setItems((prev) => [
       ...prev,
       {
-        productName: "",
-        productId: "",
+        productName: selectedProductToAdd.name,
+        productId: String(selectedProductToAdd.id),
         quantity: "1",
-        unitPrice: "0",
+        unitPrice: String(priceNum),
         discount: "0",
-        total: 0,
+        total: calcItemTotal(1, priceNum, 0),
       },
     ]);
+    setSelectedProductId("");
+    setProductSearch("");
+    setIsProductDropdownOpen(false);
   };
 
-  const updateItem = (
-    index: number,
-    field: keyof InvoiceItemForm,
-    value: string,
-  ) => {
+  const updateItemQuantity = (index: number, value: string) => {
     setItems((prev) => {
       const updated = [...prev];
-      const item = { ...updated[index], [field]: value };
+      const item = { ...updated[index], quantity: value };
       const qty = parseInt(item.quantity) || 0;
       const price = parseFloat(item.unitPrice) || 0;
       const disc = parseFloat(item.discount) || 0;
@@ -178,38 +175,15 @@ const InvoiceCreate: React.FC<{
     });
   };
 
-  // ── Product selection handler ──
-  const handleProductSelect = (index: number, productId: string) => {
-    const product = products?.find((p) => String(p.id) === productId);
-    if (!product) return;
-    setItems((prev) => {
-      const updated = [...prev];
-      const qty = parseInt(updated[index].quantity) || 1;
-      const disc = parseFloat(updated[index].discount) || 0;
-      updated[index] = {
-        ...updated[index],
-        productName: product.name,
-        productId: String(product.id),
-        unitPrice: String(product.price),
-        total: calcItemTotal(qty, product.price, disc),
-      };
-      return updated;
-    });
-    // Clear search for this item
-    setItemProductSearch((prev) => ({ ...prev, [index]: "" }));
-  };
-
   const removeItem = (index: number) => {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ── Computed values ──
-  const subtotal = items.reduce((s, it) => {
-    const qty = parseInt(it.quantity) || 0;
-    const price = parseFloat(it.unitPrice) || 0;
-    return s + qty * price;
-  }, 0);
-
+  const subtotal = items.reduce(
+    (s, it) =>
+      s + (parseInt(it.quantity) || 0) * (parseFloat(it.unitPrice) || 0),
+    0,
+  );
   const totalDiscount = items.reduce((s, it) => {
     const qty = parseInt(it.quantity) || 0;
     const price = parseFloat(it.unitPrice) || 0;
@@ -217,7 +191,7 @@ const InvoiceCreate: React.FC<{
     return s + (qty * price * disc) / 100;
   }, 0);
 
-  const taxRate = 9; // 9% VAT in Iran
+  const taxRate = 9;
   const afterDiscount = subtotal - totalDiscount;
   const tax = Math.round(afterDiscount * (taxRate / 100));
   const grandTotal = afterDiscount + tax;
@@ -227,12 +201,6 @@ const InvoiceCreate: React.FC<{
       toast.error("حداقل یک قلم به فاکتور اضافه کنید");
       return;
     }
-    const hasEmptyItem = items.some((it) => !it.productId);
-    if (hasEmptyItem) {
-      toast.error("محصول برای همه اقلام الزامی است");
-      return;
-    }
-
     try {
       console.log({
         ...data,
@@ -250,492 +218,431 @@ const InvoiceCreate: React.FC<{
   };
 
   return (
-    <>
-      <dialog
-        ref={modalRef}
-        className="modal modal-bottom sm:modal-middle"
-        onClick={handleBackdropClick}
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="فاکتور جدید"
+      description="اطلاعات مشتری و اقلام را وارد کنید"
+      icon={Receipt}
+      className="max-w-3xl h-full min-h-150"
+    >
+      <form
+        className="flex flex-col h-full overflow-hidden"
+        onSubmit={handleSubmit(onFormSubmit)}
+        noValidate
       >
-        <div className="modal-box max-w-fit lg:max-w-4xl p-0 max-h-[90vh] flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-base-200 bg-base-200/30 sticky top-0 z-10 shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Receipt size={20} className="text-primary" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">فاکتور جدید</h3>
-                <p className="text-xs text-base-content/50">
-                  اطلاعات فاکتور و اقلام را وارد کنید
-                </p>
+        <div className="flex flex-col gap-4 px-6 py-4 overflow-y-auto flex-1 custom-scrollbar">
+          {/* Row 1: Customer & Due Date */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 shrink-0">
+            <div className="md:col-span-2">
+              <label className="label py-1">
+                <span className="label-text text-xs font-bold">
+                  مشتری <span className="text-error">*</span>
+                </span>
+              </label>
+              <div
+                className="relative"
+                tabIndex={-1}
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node))
+                    setIsCustomerOpen(false);
+                }}
+              >
+                <div
+                  className={cn(
+                    "input input-bordered input-sm w-full flex items-center gap-2 cursor-pointer",
+                    errors.customerId
+                      ? "input-error"
+                      : "hover:border-base-content/40",
+                  )}
+                  onClick={() => setIsCustomerOpen(!isCustomerOpen)}
+                >
+                  <Search size={14} className="text-base-content/50 shrink-0" />
+                  <span
+                    className={cn(
+                      "flex-1 truncate text-sm",
+                      !selectedCustomer && "text-base-content/50",
+                    )}
+                  >
+                    {selectedCustomer
+                      ? selectedCustomer.name
+                      : "انتخاب مشتری..."}
+                  </span>
+                  {selectedCustomer && (
+                    <span
+                      className="flex items-center gap-1 text-xs text-base-content/70 bg-base-200 rounded-full px-2 py-0.5"
+                      dir="ltr"
+                    >
+                      <Phone size={10} /> {selectedCustomer.phone}
+                    </span>
+                  )}
+                  {selectedCustomer && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-xs btn-circle hover:bg-error/10 hover:text-error"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setValue("customerId", "");
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+                {isCustomerOpen && (
+                  <div className="absolute z-30 w-full mt-1 bg-base-100 border border-base-300 rounded-lg shadow-xl max-h-56 overflow-y-auto">
+                    <div className="p-2 border-b border-base-200 sticky top-0 bg-base-100 z-10">
+                      <input
+                        type="text"
+                        className="input input-xs w-full"
+                        placeholder="جستجوی نام، موبایل یا شهر..."
+                        value={customerSearch}
+                        onChange={(e) => setCustomerSearch(e.target.value)}
+                        autoFocus
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <ul className="menu p-1 compact">
+                      {filteredCustomers.length > 0 ? (
+                        filteredCustomers.map((c) => (
+                          <li key={c.id}>
+                            <a
+                              className="flex items-center justify-between py-2"
+                              onClick={() => {
+                                setValue("customerId", String(c.id));
+                                setIsCustomerOpen(false);
+                                setCustomerSearch("");
+                              }}
+                            >
+                              <span className="font-medium text-sm">
+                                {c.name}
+                              </span>
+                              <span
+                                className="text-xs text-base-content/60"
+                                dir="ltr"
+                              >
+                                {c.phone} | {c.city}
+                              </span>
+                            </a>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-center text-sm text-base-content/50 p-4">
+                          مشتری یافت نشد
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+                <input
+                  type="hidden"
+                  {...register("customerId", {
+                    required: "انتخاب مشتری الزامی است",
+                  })}
+                />
+                {errors.customerId && (
+                  <p className="text-error text-xs mt-1">
+                    {errors.customerId.message}
+                  </p>
+                )}
               </div>
             </div>
-            <button
-              className="btn btn-ghost btn-sm btn-circle"
-              onClick={() => handleClose()}
-              disabled={isSubmitting}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+
+            <div>
+              <label className="label py-1">
+                <span className="label-text text-xs font-bold">
+                  تاریخ سررسید <span className="text-error">*</span>
+                </span>
+              </label>
+              <input
+                type="date"
+                className={cn(
+                  "input input-bordered input-sm w-full",
+                  errors.dueDate && "input-error",
+                )}
+                {...register("dueDate", {
+                  required: "تاریخ سررسید الزامی است",
+                })}
+                disabled={isSubmitting}
+              />
+              {errors.dueDate && (
+                <p className="text-error text-xs mt-1">
+                  {errors.dueDate.message}
+                </p>
+              )}
+            </div>
           </div>
 
-          <form
-            className="overflow-y-hidden flex-1 flex flex-col"
-            onSubmit={handleSubmit(onFormSubmit)}
-            noValidate
-          >
-            <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1">
-              {/* Row 1: Customer & Due Date */}
-              <div className="flex flex-col lg:flex-row gap-4">
-                {/* Customer Select */}
-                <div className="flex-1">
-                  <label className="label">
-                    <span className="label-text font-medium">
-                      مشتری <span className="text-error">*</span>
-                    </span>
-                  </label>
-                  <select
-                    className={`select select-bordered select-sm w-full ${errors.customerId ? "select-error" : ""}`}
-                    {...register("customerId", {
-                      required: "انتخاب مشتری الزامی است",
-                    })}
-                    disabled={isSubmitting}
-                  >
-                    <option value="" disabled>
-                      انتخاب مشتری...
-                    </option>
-                    {filteredCustomers.map((c) => (
-                      <option key={c.id} value={String(c.id)}>
-                        {c.name} — {c.phone}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.customerId && (
-                    <p className="text-error text-xs mt-1">
-                      {errors.customerId.message}
-                    </p>
+          {/* Product Selection & Items Table Area */}
+          <div className="border border-base-300 rounded-lg flex-1">
+            {/* Inline Add Product Bar */}
+            <div className="flex justify-between items-center gap-2 p-3 bg-base-200/50 border-b border-base-300">
+              <div
+                className="relative "
+                tabIndex={-1}
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node))
+                    setIsProductDropdownOpen(false);
+                }}
+              >
+                <Input
+                  text="انتخاب محصول..."
+                  icon={Search}
+                  type="select"
+                  className={cn(
+                    "select-sm min-w-md",
+                    selectedProductToAdd && "border-primary/50 bg-primary/5",
                   )}
-                </div>
+                  onClick={() =>
+                    setIsProductDropdownOpen(!isProductDropdownOpen)
+                  }
+                >
+                  {selectedProductToAdd && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-xs btn-circle hover:bg-error/10 hover:text-error"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedProductId("");
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </Input>
 
-                <div className="lg:w-48">
-                  <label className="label">
-                    <span className="label-text font-medium">
-                      سررسید پرداخت <span className="text-error">*</span>
-                    </span>
-                  </label>
-                  <input
-                    type="date"
-                    className="input input-bordered input-sm w-full"
-                    {...register("dueDate", {
-                      required: "تاریخ سررسید الزامی است",
-                    })}
-                    disabled={isSubmitting}
-                  />
-                  {errors.dueDate && (
-                    <p className="text-error text-xs mt-1">
-                      {errors.dueDate.message}
-                    </p>
-                  )}
-                </div>
+                {isProductDropdownOpen && (
+                  <div className="absolute z-999 w-full mt-1 bg-base-100 border border-base-300 rounded-lg shadow-xl max-h-60 h-60 overflow-y-auto">
+                    <div className="p-2 border-b border-base-200 sticky top-0 bg-base-100 z-10">
+                      <input
+                        type="text"
+                        className="input border-0 outline-0 input-xs w-full"
+                        placeholder="جستجوی نام، برند یا SKU..."
+                        value={productSearch}
+                        onChange={(e) => setProductSearch(e.target.value)}
+                        autoFocus
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <ul className=" menu p-1 w-full">
+                      {availableProducts.length > 0 ? (
+                        availableProducts.map((p) => (
+                          <li key={p.id}>
+                            <a
+                              className="flex items-center gap-2 py-2"
+                              onClick={() => {
+                                setSelectedProductId(String(p.id));
+                                setIsProductDropdownOpen(false);
+                                setProductSearch("");
+                              }}
+                            >
+                              <img
+                                src={p.image}
+                                className="rounded-full size-8"
+                              />
+                              <div className="flex-1 flex flex-col">
+                                <span className="font-medium text-sm">
+                                  {p.name}
+                                </span>
+                                <span className="text-[10px] text-base-content/60">
+                                  {p.brand} | {p.sku}
+                                </span>
+                              </div>
+                              <span className="text-xs font-bold text-primary">
+                                {parseInt(String(p.price)).toLocaleString(
+                                  "fa-IR",
+                                )}
+                              </span>
+                            </a>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-center text-sm text-base-content/50 p-3">
+                          محصولی یافت نشد
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
               </div>
 
-              {/* Selected Customer Info Card */}
-              {selectedCustomer && (
-                <div className="flex items-center gap-4 bg-base-200/50 rounded-xl p-3 border border-base-300">
-                  <div className="avatar placeholder">
-                    <div className="w-11 h-11 rounded-full bg-primary/10">
-                      <User size={18} className="text-primary" />
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">
-                      {selectedCustomer.name}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-base-content/60 mt-0.5">
-                      <span dir="ltr">{selectedCustomer.phone}</span>
-                      <span className="hidden sm:inline">|</span>
-                      <span>{selectedCustomer.city}</span>
-                      <span className="hidden sm:inline">|</span>
-                      <span dir="ltr" className="hidden sm:inline">
-                        {selectedCustomer.email}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-left shrink-0">
-                    <p className="text-[10px] text-base-content/50">خرید کل</p>
-                    <p className="text-xs font-bold text-primary">
-                      {selectedCustomer.totalPurchases} سفارش
-                    </p>
-                  </div>
-                </div>
-              )}
+              <button
+                type="button"
+                className={cn(
+                  "btn btn-primary btn-sm gap-1 shrink-0",
+                  !selectedProductToAdd && "btn-disabled opacity-50",
+                )}
+                onClick={handleAddItem}
+                disabled={isSubmitting || !selectedProductToAdd}
+              >
+                <Plus size={16} />
+                افزودن
+              </button>
+            </div>
 
-              {/* Items Section */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-sm">اقلام فاکتور</h4>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-xs gap-1"
-                    onClick={addItem}
-                    disabled={isSubmitting}
-                  >
-                    <Plus size={14} />
-                    افزودن قلم
-                  </button>
-                </div>
-
-                {items.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 text-base-content/30 border-2 border-dashed border-base-300 rounded-xl">
-                    <Receipt size={32} className="mb-2" />
-                    <p className="text-sm">هنوز قلمی اضافه نشده است</p>
-                    <p className="text-xs mt-1">روی «افزودن قلم» کلیک کنید</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {/* Items Header */}
-                    <div className="hidden md:grid grid-cols-12 gap-2 text-xs text-base-content/50 px-2">
-                      <span className="col-span-4">محصول</span>
-                      <span className="col-span-1">تعداد</span>
-                      <span className="col-span-2">قیمت واحد</span>
-                      <span className="col-span-1">تخفیف ٪</span>
-                      <span className="col-span-2">جمع</span>
-                      <span className="col-span-2"></span>
-                    </div>
-
+            {/* Compact Table / List */}
+            {items.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-base-content/40">
+                <Package size={28} className="mb-2 opacity-50" />
+                <p className="text-xs">محصولی به فاکتور اضافه نشده است</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="table table-sm w-full">
+                  <thead>
+                    <tr className="bg-base-200/30 text-base-content/70">
+                      <th className="text-xs font-bold">محصول</th>
+                      <th className="text-xs font-bold w-24 text-center">
+                        تعداد
+                      </th>
+                      <th className="text-xs font-bold w-32 text-center">
+                        قیمت واحد
+                      </th>
+                      <th className="text-xs font-bold w-32 text-center">
+                        جمع کل
+                      </th>
+                      <th className="w-12"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {items.map((item, idx) => {
-                      const availableProducts = getAvailableProducts(idx);
                       const selectedProduct = products?.find(
                         (p) => String(p.id) === item.productId,
                       );
-                      const isOutOfStock =
-                        selectedProduct && selectedProduct.stock === 0;
-
                       return (
-                        <div
-                          key={idx}
-                          className="bg-base-200 rounded-xl p-3 space-y-2"
-                        >
-                          {/* Product Select Row */}
-                          <div className="flex gap-2 items-center">
-                            <div className="flex-1">
-                              {item.productId ? (
-                                <div className="flex items-center gap-2 bg-base-100 rounded-lg px-3 py-2">
-                                  {selectedProduct && (
-                                    <img
-                                      src={selectedProduct.image}
-                                      className="w-7 h-7 rounded-full"
-                                    />
-                                  )}
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate">
-                                      {item.productName}
-                                    </p>
-                                    {selectedProduct && (
-                                      <p
-                                        className="text-[10px] text-base-content/40 font-mono"
-                                        dir="ltr"
-                                      >
-                                        {selectedProduct.sku}
-                                      </p>
-                                    )}
-                                  </div>
-                                  <button
-                                    type="button"
-                                    className="btn btn-ghost btn-xs btn-circle text-error"
-                                    onClick={() => {
-                                      setItems((prev) => {
-                                        const updated = [...prev];
-                                        updated[idx] = {
-                                          productName: "",
-                                          productId: "",
-                                          quantity: "1",
-                                          unitPrice: "0",
-                                          discount: "0",
-                                          total: 0,
-                                        };
-                                        return updated;
-                                      });
-                                    }}
-                                    disabled={isSubmitting}
-                                  >
-                                    <svg
-                                      className="w-3.5 h-3.5"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M6 18L18 6M6 6l12 12"
-                                      />
-                                    </svg>
-                                  </button>
-                                </div>
-                              ) : (
-                                <select
-                                  className="select select-bordered select-sm w-full"
-                                  value=""
-                                  onChange={(e) => {
-                                    if (e.target.value) {
-                                      handleProductSelect(idx, e.target.value);
-                                    }
-                                  }}
-                                  disabled={isSubmitting}
-                                >
-                                  <option value="" disabled>
-                                    انتخاب محصول...
-                                  </option>
-                                  {availableProducts.map((p) => (
-                                    <option key={p.id} value={String(p.id)}>
-                                      {p.name} — {p.brand} (SKU: {p.sku})
-                                    </option>
-                                  ))}
-                                </select>
+                        <tr key={idx} className="hover">
+                          <td>
+                            <div className="flex items-center gap-2">
+                              {selectedProduct?.image && (
+                                <img
+                                  src={selectedProduct.image}
+                                  className="w-8 h-8 rounded object-cover"
+                                />
                               )}
+                              <div>
+                                <div className="font-bold text-xs">
+                                  {item.productName}
+                                </div>
+                                <div
+                                  className="text-[10px] opacity-50 font-mono"
+                                  dir="ltr"
+                                >
+                                  SKU: {selectedProduct?.sku}
+                                </div>
+                              </div>
                             </div>
+                          </td>
+                          <td className="text-center">
+                            <input
+                              type="number"
+                              min="1"
+                              max={selectedProduct?.stock || 9999}
+                              className="input input-bordered input-xs w-16 text-center"
+                              value={item.quantity}
+                              onChange={(e) =>
+                                updateItemQuantity(idx, e.target.value)
+                              }
+                              disabled={isSubmitting}
+                            />
+                          </td>
+                          <td className="text-center text-xs">
+                            {parseInt(item.unitPrice).toLocaleString("fa-IR")}
+                          </td>
+                          <td className="text-center font-bold text-sm text-primary">
+                            {item.total.toLocaleString("fa-IR")}
+                          </td>
+                          <td>
                             <button
                               type="button"
-                              className="btn btn-ghost btn-xs btn-circle text-error shrink-0"
+                              className="btn btn-ghost btn-xs btn-circle text-error hover:bg-error/10"
                               onClick={() => removeItem(idx)}
                               disabled={isSubmitting}
                             >
                               <Trash2 size={14} />
                             </button>
-                          </div>
-
-                          {/* Quantity / Price / Discount / Total Row */}
-                          {item.productId && (
-                            <>
-                              {isOutOfStock && (
-                                <div className="flex items-center gap-1.5 text-[11px] text-error font-medium bg-error/10 rounded-lg px-2.5 py-1.5">
-                                  <svg
-                                    className="w-3.5 h-3.5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>
-                                  این محصول ناموجود است
-                                </div>
-                              )}
-                              <div className="grid grid-cols-12 gap-2 items-center">
-                                <div className="col-span-3">
-                                  <label className="label py-0">
-                                    <span className="label-text-alt text-base-content/50">
-                                      تعداد
-                                    </span>
-                                  </label>
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max={selectedProduct?.stock || 9999}
-                                    className="input input-bordered input-sm w-full"
-                                    value={item.quantity}
-                                    onChange={(e) =>
-                                      updateItem(
-                                        idx,
-                                        "quantity",
-                                        e.target.value,
-                                      )
-                                    }
-                                    disabled={isSubmitting}
-                                  />
-                                  {selectedProduct && (
-                                    <p className="text-[10px] text-base-content/40 mt-0.5">
-                                      موجودی: {selectedProduct.stock} عدد
-                                    </p>
-                                  )}
-                                </div>
-                                <div className="col-span-3">
-                                  <label className="label py-0">
-                                    <span className="label-text-alt text-base-content/50">
-                                      قیمت واحد
-                                    </span>
-                                  </label>
-                                  <input
-                                    type="text"
-                                    inputMode="numeric"
-                                    dir="ltr"
-                                    className="input input-bordered input-sm w-full text-left font-mono"
-                                    value={item.unitPrice}
-                                    onChange={(e) =>
-                                      updateItem(
-                                        idx,
-                                        "unitPrice",
-                                        e.target.value,
-                                      )
-                                    }
-                                    disabled={isSubmitting}
-                                  />
-                                </div>
-                                <div className="col-span-2">
-                                  <label className="label py-0">
-                                    <span className="label-text-alt text-base-content/50">
-                                      تخفیف ٪
-                                    </span>
-                                  </label>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    className="input input-bordered input-sm w-full"
-                                    value={item.discount}
-                                    onChange={(e) =>
-                                      updateItem(
-                                        idx,
-                                        "discount",
-                                        e.target.value,
-                                      )
-                                    }
-                                    disabled={isSubmitting}
-                                  />
-                                </div>
-                                <div className="col-span-4 flex items-end justify-end">
-                                  <div className="text-right">
-                                    <p className="text-[10px] text-base-content/40 mb-1">
-                                      جمع قلم
-                                    </p>
-                                    <p className="text-sm font-bold text-primary">
-                                      {item.total.toLocaleString("fa-IR")} تومان
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
+                          </td>
+                        </tr>
                       );
                     })}
-                  </div>
-                )}
+                  </tbody>
+                </table>
               </div>
+            )}
 
-              {/* Totals */}
-              {items.length > 0 && (
-                <div className="bg-base-200/50 rounded-xl p-4 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-base-content/60">جمع اقلام:</span>
-                    <span className="font-medium">
-                      {subtotal.toLocaleString("fa-IR")} تومان
-                    </span>
-                  </div>
+            {/* Inline Totals */}
+            {items.length > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-base-200/40 border-t border-base-300">
+                <div className="flex gap-4 text-[11px] text-base-content/70">
+                  <span>جمع: {subtotal.toLocaleString("fa-IR")} تومان</span>
                   {totalDiscount > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-base-content/60">تخفیف:</span>
-                      <span className="font-medium text-success">
-                        -{totalDiscount.toLocaleString("fa-IR")} تومان
-                      </span>
-                    </div>
+                    <span className="text-success">
+                      تخفیف: -{totalDiscount.toLocaleString("fa-IR")} تومان
+                    </span>
                   )}
-                  <div className="flex justify-between text-sm">
-                    <span className="text-base-content/60">
-                      مالیات ارزش افزوده ({toPersianNum(taxRate.toString())}٪):
-                    </span>
-                    <span className="font-medium">
-                      {tax.toLocaleString("fa-IR")} تومان
-                    </span>
-                  </div>
-                  <div className="h-px bg-base-300 my-1" />
-                  <div className="flex justify-between">
-                    <span className="font-bold">مبلغ نهایی:</span>
-                    <span className="font-bold text-primary text-lg">
-                      {grandTotal.toLocaleString("fa-IR")} تومان
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* Note */}
-              <div>
-                <label className="label">
-                  <span className="label-text font-medium">یادداشت</span>
-                </label>
-                <textarea
-                  className="textarea textarea-bordered textarea-sm w-full h-20 resize-none"
-                  placeholder="توضیحات مختصر (اختیاری)"
-                  {...register("note", {
-                    maxLength: { value: 500, message: "حداکثر ۵۰۰ کاراکتر" },
-                  })}
-                  disabled={isSubmitting}
-                />
-                <label className="label justify-start gap-2">
-                  <span className="label-text-alt text-base-content/40">
-                    {toPersianNum(watchedNote.length.toString())} / ۵۰۰
+                  <span>
+                    مالیات ({toPersianNum(taxRate.toString())}٪):{" "}
+                    {tax.toLocaleString("fa-IR")} تومان
                   </span>
-                </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold">مبلغ نهایی:</span>
+                  <span className="font-bold text-lg text-primary">
+                    {grandTotal.toLocaleString("fa-IR")}
+                    <span className="text-[10px] font-normal mr-1">تومان</span>
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
+          </div>
 
-            {/* Footer */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-base-200 bg-base-200/30 shrink-0">
-              <p className="text-xs text-base-content/40">
-                <span className="text-error">*</span> فیلدهای الزامی
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={handleClose}
-                  disabled={isSubmitting}
-                >
-                  انصراف
-                </button>
-                <button
-                  type="submit"
-                  className={`btn btn-primary btn-sm gap-2 min-w-30 ${
-                    isSubmitting ? "loading" : ""
-                  }`}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <span className="loading loading-spinner loading-sm" />
-                  ) : (
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  )}
-                  {isSubmitting ? "در حال ایجاد..." : "ایجاد فاکتور"}
-                </button>
-              </div>
-            </div>
-          </form>
+          {/* Note */}
+          <div className="shrink-0">
+            <Input
+              type="textarea"
+              text="یادداشت یا توضیحات"
+              className="textarea-sm"
+              error={errors.note?.message}
+            >
+              <textarea
+                className=" w-full resize-none text-sm"
+                {...register("note", {
+                  maxLength: { value: 500, message: "حداکثر ۵۰۰ کاراکتر" },
+                })}
+                disabled={isSubmitting}
+              />
+            </Input>
+          </div>
         </div>
 
-        <form method="dialog" className="modal-backdrop">
-          <button onClick={() => handleClose()}>close</button>
-        </form>
-      </dialog>
-    </>
-  );
-};
+        {/* Footer Actions */}
+        <div className="flex items-center justify-between px-6 py-3 border-t border-base-300 bg-base-200/40 shrink-0">
+          <p className="text-[10px] text-base-content/50">
+            <span className="text-error">*</span> فیلدهای الزامی
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
+              انصراف
+            </button>
 
-export default InvoiceCreate;
+            <button
+              type="submit"
+              className={cn(
+                "btn btn-primary btn-sm gap-2 min-w-28",
+                isSubmitting && "loading",
+              )}
+              disabled={isSubmitting || !items?.length}
+            >
+              {!isSubmitting && <Check size={16} />}
+              {isSubmitting ? "در حال ثبت..." : "ثبت فاکتور"}
+            </button>
+          </div>
+        </div>
+      </form>
+    </Modal>
+  );
+}

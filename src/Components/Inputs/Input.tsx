@@ -3,7 +3,8 @@ import React from "react";
 import { cn } from "../../Utils/Cn";
 
 interface InputProps extends React.ComponentProps<"div"> {
-  text: string;
+  text?: string;
+  icon?: React.ComponentType<React.ComponentProps<any>>;
   error?: string;
   required?: boolean;
   type: "input" | "select" | "textarea";
@@ -15,22 +16,26 @@ export default function Input({
   children,
   required = false,
   type,
+  icon: Icon,
   ...props
 }: InputProps) {
-  console.log(error);
-
   return (
     <div className="w-full">
       <div
         className={cn(
           type,
-          "focus-within:border-0 focus-within:text-primary w-full",
+          "focus-within:border-0 focus-within:text-primary focus-within:outline-primary w-full",
           error && "input-error",
           className,
         )}
         {...props}
       >
-        <InputLabel text={text} required={required} />
+        <div className="flex gap-2 items-center">
+          {Icon && <Icon size={14} />}
+
+          {text && <InputLabel text={text} required={required} />}
+        </div>
+
         {children}
       </div>
       {error && <InputError message={error} />}
