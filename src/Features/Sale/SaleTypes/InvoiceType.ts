@@ -21,15 +21,9 @@ export interface Invoice {
   discount: number;
   total: number;
   status: InvoiceStatus;
-  date: string;       // ISO date string e.g. "1404/03/15"
-  dueDate: string;    // ISO date string
+  date: string;
+  dueDate: string;
   daysOverdue?: number;
   paidAt?: string;
   note?: string;
-}
-
-export interface InvoiceState {
-  invoices: Invoice[];
-  isLoading: boolean;
-  error: string | null;
 }

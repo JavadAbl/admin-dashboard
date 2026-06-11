@@ -17,6 +17,7 @@ const menuItems: SidebarMenuItemType[] = [
     icon: "💰",
     children: [
       { name: "مرور فاکتورها", icon: "📊", path: "/Sales" },
+      { name: "فاکتورها", icon: "📋", path: "/Sales/Invoices" },
       {
         name: "گزارشات",
         icon: "📈",
@@ -38,7 +39,7 @@ const menuItems: SidebarMenuItemType[] = [
     icon: "🛍️",
     children: [
       { name: "مرور محصولات", icon: "📊", path: "/Products" },
-      { name: "لیست محصولات", icon: "📦", path: "/Products/List" },
+      { name: "محصولات", icon: "📦", path: "/Products/List" },
     ],
   },
 
@@ -47,8 +48,6 @@ const menuItems: SidebarMenuItemType[] = [
     icon: "👥",
     path: "/Customers",
   },
-
-  { name: "تنضیمات", icon: "⚙️", path: "/Settings" },
 
   { name: "پیام ها", icon: "✉️", badge: 4, path: "/Messages" },
 ];

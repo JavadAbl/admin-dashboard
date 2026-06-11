@@ -25,7 +25,7 @@ export default function SalesStateCard({
             <p className="text-xs font-medium text-base-content/60 uppercase tracking-wide">
               {title}
             </p>
-            <p className="text-2xl font-bold mt-1">{value}</p>
+            <p className="text-base font-bold mt-1">{value}</p>
             {change && (
               <p
                 className={cn(
