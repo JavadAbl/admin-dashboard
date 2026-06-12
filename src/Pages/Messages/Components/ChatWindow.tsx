@@ -1,16 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { Conversation } from "../../../Utils/Api/MockData/ConversationsMock";
 
+// --- ADD onSendMessage TO PROPS ---
 interface Props {
   conversation: Conversation;
+  onSendMessage: (conversationId: number, messageText: string) => void;
 }
 
-const ChatWindow: React.FC<Props> = ({ conversation }) => {
+export default function ChatWindow({ conversation, onSendMessage }: Props) {
   const [newMsg, setNewMsg] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom on new message or conversation change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation.messages, isTyping]);
@@ -18,21 +19,18 @@ const ChatWindow: React.FC<Props> = ({ conversation }) => {
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMsg.trim()) return;
-    // In real app, push to state / API
-    conversation.messages.push({
-      id: Date.now(),
-      sender: "me",
-      text: newMsg,
-      time: "اکنون",
-    });
+
+    // --- CALL THE PARENT CALLBACK INSTEAD OF MUTATING ---
+    onSendMessage(conversation.id, newMsg);
+
     setNewMsg("");
+
     // Simulate other party typing
     setIsTyping(true);
     setTimeout(() => setIsTyping(false), 2000);
   };
 
-  // Group messages by date (simplified: all in same day)
-  const showDate = true; // You can implement logic to show date separator
+  const isEmpty = conversation.messages.length === 0;
 
   return (
     <div className="flex flex-col h-full bg-base-100">
@@ -42,44 +40,64 @@ const ChatWindow: React.FC<Props> = ({ conversation }) => {
           className={`avatar ${conversation.online ? "online" : "offline"} placeholder`}
         >
           <div className="w-12 rounded-full bg-neutral text-neutral-content">
-            <span className="text-xl">{conversation.avatar}</span>
+            <img src={"/images/user-avatar.webp"} className="rounded-full" />
           </div>
         </div>
         <div>
           <h3 className="font-bold text-lg">{conversation.name}</h3>
           <p className="text-xs text-base-content/60">
-            {conversation.online ? "آنلاین" : "آفلاین"}
+            {isEmpty ? "شروع گفتگو" : conversation.online ? "آنلاین" : "آفلاین"}
           </p>
         </div>
       </div>
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {showDate && (
-          <div className="text-center">
-            <span className="badge badge-ghost text-xs">امروز</span>
+        {isEmpty ? (
+          <div className="flex flex-col items-center justify-center h-full text-base-content/40 gap-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-12 w-12 opacity-30"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.5"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
+            </svg>
+            <p className="text-sm">اولین پیام را ارسال کنید!</p>
+            <p className="text-xs">گفتگویی با {conversation.name} شروع کنید</p>
           </div>
-        )}
-        {conversation.messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`chat ${msg.sender === "me" ? "chat-end" : "chat-start"}`}
-          >
-            <div className="chat-bubble max-w-[75%] whitespace-pre-wrap break-words">
-              {msg.text}
+        ) : (
+          <>
+            <div className="text-center">
+              <span className="badge badge-ghost text-xs">امروز</span>
             </div>
-            <div className="chat-footer text-xs opacity-50 mt-1">
-              {msg.time}
-            </div>
-          </div>
-        ))}
-        {/* Typing indicator */}
-        {isTyping && (
-          <div className="chat chat-start">
-            <div className="chat-bubble bg-base-200 text-base-content">
-              <span className="loading loading-dots loading-sm"></span>
-            </div>
-          </div>
+            {conversation.messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`chat ${msg.sender === "me" ? "chat-end" : "chat-start"}`}
+              >
+                <div className="chat-bubble max-w-[75%] whitespace-pre-wrap break-words">
+                  {msg.text}
+                </div>
+                <div className="chat-footer text-xs opacity-50 mt-1">
+                  {msg.time}
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="chat chat-start">
+                <div className="chat-bubble bg-base-200 text-base-content">
+                  <span className="loading loading-dots loading-sm"></span>
+                </div>
+              </div>
+            )}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -115,6 +133,4 @@ const ChatWindow: React.FC<Props> = ({ conversation }) => {
       </form>
     </div>
   );
-};
-
-export default ChatWindow;
+}

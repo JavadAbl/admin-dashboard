@@ -1,6 +1,6 @@
 export interface Message {
   id: number;
-  sender: "me" | "other";
+  sender: string;
   text: string;
   time: string;
 }
@@ -8,74 +8,61 @@ export interface Message {
 export interface Conversation {
   id: number;
   name: string;
-  avatar: string; // emoji or image URL
+  avatar: string;
+  online: boolean;
   lastMessage: string;
   lastTime: string;
   unread: number;
-  online: boolean;
   messages: Message[];
+  userId?: string; // link to User.id when conversation started from user list
 }
 
 export const conversations: Conversation[] = [
   {
     id: 1,
-    name: "سارا محمدی",
-    avatar: "👩",
-    lastMessage: "ممنون از پیگیری شما",
-    lastTime: "۱۰:۴۵",
-    unread: 3,
+    name: "علی محمدی",
+    avatar: "ع",
     online: true,
+    lastMessage: "سلام، پروژه رو ببین لطفاً",
+    lastTime: "۱۰:۳۰",
+    unread: 2,
+    userId: "user-1",
     messages: [
-      { id: 1, sender: "other", text: "سلام، وقت بخیر", time: "۱۰:۳۰" },
-      {
-        id: 2,
-        sender: "me",
-        text: "سلام، چطور میتونم کمک کنم؟",
-        time: "۱۰:۳۲",
-      },
+      { id: 1, sender: "other", text: "سلام، خوبی؟", time: "۱۰:۰۰" },
+      { id: 2, sender: "me", text: "سلام! ممنون، تو چطوری؟", time: "۱۰:۰۵" },
       {
         id: 3,
         sender: "other",
-        text: "در مورد سفارش شماره ۴۵۶۷ سوال داشتم",
-        time: "۱۰:۳۳",
+        text: "سلام، پروژه رو ببین لطفاً",
+        time: "۱۰:۳۰",
       },
-      { id: 4, sender: "me", text: "بله، بفرمایید", time: "۱۰:۳۵" },
-      { id: 5, sender: "other", text: "ممنون از پیگیری شما", time: "۱۰:۴۵" },
     ],
   },
   {
     id: 2,
-    name: "علی رضایی",
-    avatar: "👨",
-    lastMessage: "فایل قرارداد رو ارسال کردم",
+    name: "سارا احمدی",
+    avatar: "س",
+    online: false,
+    lastMessage: "فایل رو فرستادم",
     lastTime: "دیروز",
     unread: 0,
-    online: false,
+    userId: "user-2",
     messages: [
-      {
-        id: 1,
-        sender: "other",
-        text: "فایل قرارداد رو ارسال کردم",
-        time: "دیروز ۱۸:۲۰",
-      },
+      { id: 1, sender: "other", text: "فایل رو فرستادم", time: "۱۸:۲۰" },
     ],
   },
   {
     id: 3,
-    name: "تیم پشتیبانی",
-    avatar: "🎧",
-    lastMessage: "کاربر جدید ثبت‌نام کرد",
-    lastTime: "دوشنبه",
-    unread: 1,
+    name: "رضا کریمی",
+    avatar: "ر",
     online: true,
+    lastMessage: "جلسه ساعت چنده؟",
+    lastTime: "۹:۱۵",
+    unread: 1,
+    userId: "user-3",
     messages: [
-      {
-        id: 1,
-        sender: "other",
-        text: "کاربر جدید ثبت‌نام کرد",
-        time: "دوشنبه ۹:۱۵",
-      },
-      { id: 2, sender: "me", text: "اطلاعاتش رو بفرستید", time: "دوشنبه ۹:۲۰" },
+      { id: 1, sender: "me", text: "سلام رضا", time: "۹:۰۰" },
+      { id: 2, sender: "other", text: "جلسه ساعت چنده؟", time: "۹:۱۵" },
     ],
   },
 ];
