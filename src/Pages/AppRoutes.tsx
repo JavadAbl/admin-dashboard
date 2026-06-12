@@ -17,6 +17,8 @@ import ProductList from "./Products/ProductList/ProductList";
 import ProductDetails from "./Products/Components/ProductDetails";
 import SalesRoutes from "./Sales/SalesRoutes";
 import MessagesRoutes from "./Messages/MessagesRoutes";
+import UsersRoutes from "./Users/UserRoutes";
+import FinancialRoutes from "./Financial/FinancialRoutes";
 
 export default function AppRoutes() {
   const theme = useAppSelector((s) => s.app.theme);
@@ -47,7 +49,9 @@ export default function AppRoutes() {
             <Route path="/Customers" element={<Customers />} />
 
             <Route path="/Sales/*" element={<SalesRoutes />} />
+            <Route path="/Financial/*" element={<FinancialRoutes />} />
             <Route path="/Messages/*" element={<MessagesRoutes />} />
+            <Route path="/Users/*" element={<UsersRoutes />} />
           </Route>
         </Route>
 

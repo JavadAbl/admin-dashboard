@@ -14,7 +14,7 @@ const menuItems: SidebarMenuItemType[] = [
 
   {
     name: "فروش",
-    icon: "💰",
+    icon: "💹",
     children: [
       { name: "مرور فاکتورها", icon: "📊", path: "/Sales" },
       { name: "فاکتورها", icon: "📋", path: "/Sales/Invoices" },
@@ -31,9 +31,28 @@ const menuItems: SidebarMenuItemType[] = [
   },
 
   {
+    name: "مالی و حسابداری",
+    icon: "💵",
+    children: [
+      { name: "مالی", icon: "📈", path: "/Financial" },
+      { name: "مطالبات", icon: "💳", path: "/Financial/List" },
+      { name: "تراکنش ها", icon: "💱", path: "/Financial/Transactions" },
+    ],
+  },
+
+  {
     name: "مشتریان",
     icon: "👥",
     path: "/Customers",
+  },
+
+  {
+    name: "مدیریت کاربران و مجوزها",
+    icon: "🔐",
+    children: [
+      { name: "کاربران", path: "/Users", icon: "👨" },
+      { name: "مجوزها", path: "/Users/Permissions", icon: "🔑" },
+    ],
   },
 
   { name: "پیام ها", icon: "✉️", badge: 4, path: "/Messages" },
@@ -81,17 +100,17 @@ export default function Sidebar({
       ></label>
 
       <aside
-        className={`w-64 min-h-full bg-base-100 text-base-content transition-all duration-300 ease-in-out relative
+        className={`flex flex-col w-64 h-screen max-h-full bg-base-100 text-base-content transition-all duration-300 ease-in-out relative 
                          ${isDesktopCollapsed ? "lg:w-16" : "lg:w-64"}`}
       >
         {/* Sidebar Header / Logo */}
         <div
-          className={`p-4 border-b border-base-300 flex items-center ${
+          className={`p-4 border-b border-base-300 flex items-center shrink-0 ${
             isDesktopCollapsed ? "lg:justify-center" : "justify-between"
           }`}
         >
           <h2
-            className={`text-2xl font-bold transition-opacity duration-200 ${
+            className={`text-xl font-bold transition-opacity duration-200 ${
               isDesktopCollapsed ? "lg:hidden" : ""
             }`}
           >
@@ -121,7 +140,10 @@ export default function Sidebar({
         </div>
 
         {/* Sidebar Menu */}
-        <ul className="menu p-2 lg:p-4 w-full">
+        <ul
+          className="menu p-2 lg:p-4 w-full flex-1 flex-nowrap overflow-y-auto overflow-x-hidden"
+          style={{ scrollbarGutter: "stable" }}
+        >
           {menuItems.map((item) => (
             // Key is moved here to avoid React warnings
             <SidebarMenuItem
@@ -134,7 +156,7 @@ export default function Sidebar({
 
         {/* Sidebar Footer */}
         <div
-          className={`absolute bottom-0 w-full p-4 border-t border-base-300 bg-base-200 ${
+          className={`w-full p-4 border-t border-base-300 bg-base-200 shrink-0 ${
             isDesktopCollapsed
               ? "lg:flex-col lg:items-center lg:gap-4"
               : " flex items-center justify-between "

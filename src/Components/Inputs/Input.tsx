@@ -24,19 +24,19 @@ export default function Input({
       <div
         className={cn(
           type,
-          "focus-within:border-0 focus-within:text-primary focus-within:outline-primary w-full",
+          "focus-within:border-0 focus-within:text-primary focus-within:outline-primary w-full flex",
           error && "input-error",
           className,
         )}
         {...props}
       >
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center shrink-0">
           {Icon && <Icon size={14} />}
 
           {text && <InputLabel text={text} required={required} />}
         </div>
 
-        {children}
+        <div className="flex-1"> {children}</div>
       </div>
       {error && <InputError message={error} />}
     </div>

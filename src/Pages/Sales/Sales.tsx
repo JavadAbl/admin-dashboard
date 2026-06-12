@@ -1,4 +1,3 @@
-import React from "react";
 import { formatCurrency, formatNumber } from "../../Utils/AppUtils";
 import SalesStateCard from "./Components/SalesStateCard";
 import SalesRecentInvoices from "./Components/SalesRecentInvoices";
@@ -8,7 +7,7 @@ import LoadingSpinner from "../../Components/Utils/LoadingSpinner";
 import { useGetInvoices } from "../../Features/Sale/SaleApi";
 
 // ============ Main Component ============
-const SalesPage: React.FC = () => {
+export default function SalesPage() {
   const { data: invoices, isLoading } = useGetInvoices();
 
   if (isLoading) return <LoadingSpinner centerScreen />;
@@ -35,22 +34,6 @@ const SalesPage: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="btn btn-primary btn-sm gap-2">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            فاکتور جدید
-          </button>
           <button className="btn btn-outline btn-sm gap-2">
             <svg
               className="w-4 h-4"
@@ -123,6 +106,4 @@ const SalesPage: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default SalesPage;
+}
