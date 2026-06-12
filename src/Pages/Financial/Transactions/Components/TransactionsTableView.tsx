@@ -21,6 +21,7 @@ import type {
   TransactionMethod,
   TransactionStatus,
 } from "../../../../Features/Financial/FinancialTypes/TransactionType";
+import { cn } from "../../../../Utils/Cn";
 
 const methodIcons: Record<TransactionMethod, React.ReactNode> = {
   cash: <Banknote size={12} />,
@@ -104,21 +105,19 @@ export default function TransactionsTableView({ transactions }: Props) {
               return (
                 <tr
                   key={txn.id}
-                  className={
-                    txn.status === "cancelled"
-                      ? "opacity-50"
-                      : txn.status === "failed"
-                        ? "bg-error/5"
-                        : ""
-                  }
+                  className={cn(
+                    txn.status === "cancelled" && "opacity-50",
+                    txn.status === "failed" && "bg-error/5",
+                  )}
                 >
                   {/* Transaction Number */}
                   <td>
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-                          isReceipt ? "bg-success/10" : "bg-error/10"
-                        }`}
+                        className={cn(
+                          "w-9 h-9 rounded-lg flex items-center justify-center",
+                          isReceipt ? "bg-success/10" : "bg-error/10",
+                        )}
                       >
                         {isReceipt ? (
                           <ArrowDownCircle size={16} className="text-success" />
@@ -142,7 +141,10 @@ export default function TransactionsTableView({ transactions }: Props) {
                   {/* Type */}
                   <td>
                     <span
-                      className={`badge badge-sm ${isReceipt ? "badge-success" : "badge-error"} gap-1`}
+                      className={cn(
+                        "badge badge-sm gap-1",
+                        isReceipt ? "badge-success" : "badge-error",
+                      )}
                     >
                       {isReceipt ? (
                         <ArrowDownCircle size={10} />
@@ -162,9 +164,10 @@ export default function TransactionsTableView({ transactions }: Props) {
 
                   {/* Amount */}
                   <td
-                    className={`text-sm font-medium whitespace-nowrap ${
-                      isReceipt ? "text-success" : "text-error"
-                    }`}
+                    className={cn(
+                      "text-sm font-medium whitespace-nowrap",
+                      isReceipt ? "text-success" : "text-error",
+                    )}
                   >
                     {isReceipt ? "+" : "-"}
                     {formatCurrency(txn.amount)}
@@ -189,7 +192,9 @@ export default function TransactionsTableView({ transactions }: Props) {
 
                   {/* Status */}
                   <td>
-                    <span className={`badge badge-sm ${statusBadge.cls} gap-1`}>
+                    <span
+                      className={cn("badge badge-sm gap-1", statusBadge.cls)}
+                    >
                       {statusBadge.icon}
                       {statusBadge.label}
                     </span>
@@ -226,11 +231,7 @@ export default function TransactionsTableView({ transactions }: Props) {
                       }
                     >
                       <li>
-                        <a
-                          onClick={() =>
-                            navigate(`/Accounting/Transactions/${txn.id}`)
-                          }
-                        >
+                        <a onClick={() => navigate(`${txn.id}`)}>
                           <Eye size={18} />
                           مشاهده جزئیات
                         </a>

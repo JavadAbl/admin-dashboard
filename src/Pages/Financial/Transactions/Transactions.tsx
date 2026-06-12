@@ -8,6 +8,7 @@ import type {
 } from "../../../Features/Financial/FinancialTypes/TransactionType";
 import TransactionCreate from "./Components/TransactionCreate";
 import { useGetTransactions } from "../../../Features/Financial/FinancialApi";
+import { cn } from "../../../Utils/Cn";
 
 export default function Transactions() {
   const [modalsKey, setModalsKey] = useState(0);
@@ -86,16 +87,27 @@ export default function Transactions() {
               </div>
             </div>
             <div
-              className={`stat rounded-box ring-1 p-3 ${netCashFlow >= 0 ? "bg-primary/5 ring-primary/20" : "bg-error/5 ring-error/20"}`}
+              className={cn(
+                "stat rounded-box ring-1 p-3",
+                netCashFlow >= 0
+                  ? "bg-primary/5 ring-primary/20"
+                  : "bg-error/5 ring-error/20",
+              )}
             >
               <div
-                className={`flex items-center gap-2 mb-1 ${netCashFlow >= 0 ? "text-primary" : "text-error"}`}
+                className={cn(
+                  "flex items-center gap-2 mb-1",
+                  netCashFlow >= 0 ? "text-primary" : "text-error",
+                )}
               >
                 <ArrowDownCircle size={16} />
                 <span className="text-xs">موجودی خالص</span>
               </div>
               <div
-                className={`text-lg font-bold ${netCashFlow >= 0 ? "text-primary" : "text-error"}`}
+                className={cn(
+                  "text-lg font-bold",
+                  netCashFlow >= 0 ? "text-primary" : "text-error",
+                )}
               >
                 {netCashFlow.toLocaleString("fa-IR")}
                 <span className="text-[10px] font-normal mr-1">تومان</span>
@@ -142,7 +154,10 @@ export default function Transactions() {
                     ).map((f) => (
                       <button
                         key={f.key}
-                        className={`join-item btn btn-sm ${typeFilter === f.key ? "btn-primary" : ""}`}
+                        className={cn(
+                          "join-item btn btn-sm",
+                          typeFilter === f.key && "btn-primary",
+                        )}
                         onClick={() => setTypeFilter(f.key)}
                       >
                         {f.label}
@@ -168,7 +183,10 @@ export default function Transactions() {
                     ).map((f) => (
                       <button
                         key={f.key}
-                        className={`join-item btn btn-sm ${statusFilter === f.key ? "btn-primary" : ""}`}
+                        className={cn(
+                          "join-item btn btn-sm",
+                          statusFilter === f.key && "btn-primary",
+                        )}
                         onClick={() => setStatusFilter(f.key)}
                       >
                         {f.label}

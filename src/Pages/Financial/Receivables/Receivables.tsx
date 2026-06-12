@@ -2,35 +2,50 @@ import { useState } from "react";
 import { Search, FileText, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { formatNumber } from "../../../Utils/AppUtils";
 import ReceivablesTableView from "./Components/ReceivablesTableView";
-import { useGetReceivables } from "../../../Features/Accounting/AccountingApi";
-import type { ReceivableStatus } from "../../../Features/Accounting/AccountingTypes/AccountingType";
+import { useGetReceivables } from "../../../Features/Financial/FinancialApi";
+import type { ReceivableStatus } from "../../../Features/Financial/FinancialTypes/ReceivablesType";
+import { cn } from "../../../Utils/Cn";
 
 export default function Receivables() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ReceivableStatus | "all">("all");
-  const [sortField, setSortField] = useState<"dueDate" | "remainingAmount" | "issueDate">("dueDate");
+  const [statusFilter, setStatusFilter] = useState<ReceivableStatus | "all">(
+    "all",
+  );
+  const [sortField, setSortField] = useState<
+    "dueDate" | "remainingAmount" | "issueDate"
+  >("dueDate");
 
   const { data: receivables } = useGetReceivables();
   if (!receivables) return null;
 
   // Summary stats
-  const totalReceivables = receivables.reduce((sum, r) => sum + r.totalAmount, 0);
+  const totalReceivables = receivables.reduce(
+    (sum, r) => sum + r.totalAmount,
+    0,
+  );
   const totalPaid = receivables.reduce((sum, r) => sum + r.paidAmount, 0);
-  const totalRemaining = receivables.reduce((sum, r) => sum + r.remainingAmount, 0);
+  const totalRemaining = receivables.reduce(
+    (sum, r) => sum + r.remainingAmount,
+    0,
+  );
   const overdueCount = receivables.filter((r) => r.status === "overdue").length;
 
   // Filtered & sorted
   const filteredReceivables = receivables
     .filter((rec) => {
       const matchSearch =
-        rec.receivableNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        rec.receivableNumber
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
         rec.customerName.includes(searchQuery);
       const matchStatus = statusFilter === "all" || rec.status === statusFilter;
       return matchSearch && matchStatus;
     })
     .sort((a, b) => {
-      if (sortField === "dueDate") return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      if (sortField === "remainingAmount") return b.remainingAmount - a.remainingAmount;
+      if (sortField === "dueDate")
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      if (sortField === "remainingAmount")
+        return b.remainingAmount - a.remainingAmount;
       return new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime();
     });
 
@@ -114,7 +129,10 @@ export default function Receivables() {
                     ).map((f) => (
                       <button
                         key={f.key}
-                        className={`join-item btn btn-sm ${statusFilter === f.key ? "btn-primary" : ""}`}
+                        className={cn(
+                          "join-item btn btn-sm",
+                          statusFilter === f.key && "btn-primary",
+                        )}
                         onClick={() => setStatusFilter(f.key)}
                       >
                         {f.label}
@@ -129,7 +147,14 @@ export default function Receivables() {
                   <select
                     className="select select-bordered select-sm"
                     value={sortField}
-                    onChange={(e) => setSortField(e.target.value as "dueDate" | "remainingAmount" | "issueDate")}
+                    onChange={(e) =>
+                      setSortField(
+                        e.target.value as
+                          | "dueDate"
+                          | "remainingAmount"
+                          | "issueDate",
+                      )
+                    }
                   >
                     <option value="dueDate">مرتب: نزدیک‌ترین سررسید</option>
                     <option value="remainingAmount">مرتب: بیشترین مانده</option>

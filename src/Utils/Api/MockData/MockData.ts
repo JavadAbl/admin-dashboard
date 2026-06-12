@@ -3,6 +3,7 @@ import { customers } from "./CustomersMock";
 import { invoicesMock } from "./InvoicesMock";
 import { productOrderHistory } from "./ProductOrderHistoryMock";
 import { products } from "./ProductsMock";
+import { receivablesMock } from "./ReceivableMock";
 import { transactionsMock } from "./TransactionsMock";
 import { usersMock } from "./UsersMock";
 
@@ -177,4 +178,6 @@ export const MockData = {
   usersMock,
 
   transactionsMock,
+
+  receivablesMock,
 };

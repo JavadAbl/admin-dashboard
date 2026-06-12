@@ -17,6 +17,7 @@ import type {
   Transaction,
   TransactionMethod,
 } from "../../../../Features/Financial/FinancialTypes/TransactionType";
+import { cn } from "../../../../Utils/Cn";
 
 const methodLabels: Record<
   TransactionMethod,
@@ -34,6 +35,20 @@ const statusIcons: Record<string, React.ReactNode> = {
   pending: <Clock size={12} />,
   failed: <XCircle size={12} />,
   cancelled: <Ban size={12} />,
+};
+
+const statusLabels: Record<string, string> = {
+  completed: "تکمیل‌شده",
+  pending: "در انتظار",
+  failed: "ناموفق",
+  cancelled: "لغو‌شده",
+};
+
+const statusColors: Record<string, string> = {
+  completed: "badge-success",
+  pending: "badge-warning",
+  failed: "badge-error",
+  cancelled: "badge-ghost",
 };
 
 interface Props {
@@ -63,15 +78,17 @@ export default function TransactionViewModal({
         {/* Summary Stats */}
         <div className="grid grid-cols-3 gap-3 shrink-0">
           <div
-            className={
-              isReceipt
-                ? "bg-success/10 rounded-lg p-3"
-                : "bg-error/10 rounded-lg p-3"
-            }
+            className={cn(
+              "rounded-lg p-3",
+              isReceipt ? "bg-success/10" : "bg-error/10",
+            )}
           >
             <p className="text-xs text-base-content/70 mb-1">مبلغ</p>
             <p
-              className={`font-bold text-sm ${isReceipt ? "text-success" : "text-error"}`}
+              className={cn(
+                "font-bold text-sm",
+                isReceipt ? "text-success" : "text-error",
+              )}
             >
               {formatCurrency(transaction.amount)}
             </p>
@@ -102,24 +119,13 @@ export default function TransactionViewModal({
           <div className="text-left">
             <p className="text-xs text-base-content/60">وضعیت</p>
             <span
-              className={`badge ${
-                transaction.status === "completed"
-                  ? "badge-success"
-                  : transaction.status === "pending"
-                    ? "badge-warning"
-                    : transaction.status === "failed"
-                      ? "badge-error"
-                      : "badge-ghost"
-              } badge-sm gap-1`}
+              className={cn(
+                "badge badge-sm gap-1",
+                statusColors[transaction.status],
+              )}
             >
               {statusIcons[transaction.status]}
-              {transaction.status === "completed"
-                ? "تکمیل‌شده"
-                : transaction.status === "pending"
-                  ? "در انتظار"
-                  : transaction.status === "failed"
-                    ? "ناموفق"
-                    : "لغو‌شده"}
+              {statusLabels[transaction.status]}
             </span>
           </div>
         </div>
@@ -144,7 +150,10 @@ export default function TransactionViewModal({
                 <td className="text-base-content/60">نوع</td>
                 <td>
                   <span
-                    className={`badge ${isReceipt ? "badge-success" : "badge-error"} badge-sm gap-1`}
+                    className={cn(
+                      "badge badge-sm gap-1",
+                      isReceipt ? "badge-success" : "badge-error",
+                    )}
                   >
                     {isReceipt ? (
                       <ArrowDownCircle size={12} />

@@ -24,6 +24,7 @@ import { useNavigate, useParams } from "react-router";
 import { formatCurrency, toPersianDate } from "../../../../Utils/AppUtils";
 import type { TransactionMethod } from "../../../../Features/Financial/FinancialTypes/TransactionType";
 import { useGetTransactions } from "../../../../Features/Financial/FinancialApi";
+import { cn } from "../../../../Utils/Cn";
 
 const methodInfo: Record<
   TransactionMethod,
@@ -50,7 +51,7 @@ export default function TransactionDetails() {
         <p className="font-medium">تراکنش یافت نشد</p>
         <button
           className="btn btn-ghost btn-sm mt-4"
-          onClick={() => navigate("/Accounting/Transactions")}
+          onClick={() => navigate("/Financial/Transactions")}
         >
           <ArrowLeft size={16} />
           بازگشت به لیست
@@ -140,7 +141,7 @@ export default function TransactionDetails() {
             <button className="btn btn-ghost btn-circle btn-sm">
               <ArrowLeft
                 size={20}
-                onClick={() => navigate("/Accounting/Transactions")}
+                onClick={() => navigate("/Financial/Transactions")}
               />
             </button>
           </div>
@@ -155,7 +156,10 @@ export default function TransactionDetails() {
               <div className="card-body">
                 <div className="flex items-start justify-between mb-4">
                   <div
-                    className={`w-14 h-14 rounded-xl flex items-center justify-center ${isReceipt ? "bg-success/10" : "bg-error/10"}`}
+                    className={cn(
+                      "w-14 h-14 rounded-xl flex items-center justify-center",
+                      isReceipt ? "bg-success/10" : "bg-error/10",
+                    )}
                   >
                     {isReceipt ? (
                       <ArrowDownCircle size={24} className="text-success" />
@@ -164,7 +168,10 @@ export default function TransactionDetails() {
                     )}
                   </div>
                   <span
-                    className={`badge ${currentStatus.color} badge-lg gap-1 font-medium shadow-sm`}
+                    className={cn(
+                      "badge badge-lg gap-1 font-medium shadow-sm",
+                      currentStatus.color,
+                    )}
                   >
                     {currentStatus.icon}
                     {currentStatus.label}
@@ -179,7 +186,10 @@ export default function TransactionDetails() {
                 </h2>
 
                 <p
-                  className={`text-xl font-bold ${isReceipt ? "text-success" : "text-error"}`}
+                  className={cn(
+                    "text-xl font-bold",
+                    isReceipt ? "text-success" : "text-error",
+                  )}
                 >
                   {isReceipt ? "+" : "-"}
                   {formatCurrency(transaction.amount)}
@@ -227,7 +237,10 @@ export default function TransactionDetails() {
                   <span className="text-xs">مبلغ</span>
                 </div>
                 <div
-                  className={`text-lg font-bold ${isReceipt ? "text-success" : "text-error"}`}
+                  className={cn(
+                    "text-lg font-bold",
+                    isReceipt ? "text-success" : "text-error",
+                  )}
                 >
                   {formatCurrency(transaction.amount)}
                 </div>
@@ -294,7 +307,10 @@ export default function TransactionDetails() {
                         </td>
                         <td>
                           <span
-                            className={`badge ${isReceipt ? "badge-success" : "badge-error"} gap-1`}
+                            className={cn(
+                              "badge gap-1",
+                              isReceipt ? "badge-success" : "badge-error",
+                            )}
                           >
                             {isReceipt ? (
                               <ArrowDownCircle size={12} />
@@ -359,7 +375,7 @@ export default function TransactionDetails() {
                         </td>
                         <td>
                           <span
-                            className={`badge ${currentStatus.color} gap-1`}
+                            className={cn("badge gap-1", currentStatus.color)}
                           >
                             {currentStatus.icon}
                             {currentStatus.label}

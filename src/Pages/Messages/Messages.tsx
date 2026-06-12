@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ConversationList from "./Components/ConversationList";
 import ChatWindow from "./Components/ChatWindow";
 import { conversations } from "../../Utils/Api/MockData/ConversationsMock";
+import { useGetUsers } from "../../Features/Auth/AuthApi";
 
 const Messages: React.FC = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);

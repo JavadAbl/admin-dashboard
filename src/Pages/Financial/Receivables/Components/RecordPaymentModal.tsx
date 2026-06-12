@@ -2,8 +2,9 @@ import { useCallback, useState } from "react";
 import { CreditCard, Banknote, Landmark } from "lucide-react";
 import { toast } from "sonner";
 import Modal from "../../../../Components/Modals/Modal";
-import type { Receivable } from "../../AccountingType";
 import { formatCurrency } from "../../../../Utils/AppUtils";
+import type { Receivable } from "../../../../Features/Financial/FinancialTypes/ReceivablesType";
+import { cn } from "../../../../Utils/Cn";
 
 interface Props {
   isOpen: boolean;
@@ -20,7 +21,9 @@ export default function RecordPaymentModal({
   const [paymentDate, setPaymentDate] = useState(
     new Date().toISOString().split("T")[0],
   );
-  const [method, setMethod] = useState<"cash" | "bank_transfer" | "card" | "cheque" | "online">("cash");
+  const [method, setMethod] = useState<
+    "cash" | "bank_transfer" | "card" | "cheque" | "online"
+  >("cash");
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -74,8 +77,17 @@ export default function RecordPaymentModal({
       <form onSubmit={handleSubmit} className="p-6 space-y-4">
         {error && (
           <div className="alert alert-error">
-            <svg className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2m2-2l2 2m-2-2l-2-2" />
+            <svg
+              className="stroke-current shrink-0 h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2m2-2l2 2m-2-2l-2-2"
+              />
             </svg>
             <span>{error}</span>
           </div>
@@ -87,7 +99,9 @@ export default function RecordPaymentModal({
           <p className="text-sm font-medium mb-2">{receivable.customerName}</p>
           <div className="flex justify-between items-center">
             <span className="text-sm text-base-content/60">مانده طلب:</span>
-            <span className="font-bold text-error">{formatCurrency(receivable.remainingAmount)}</span>
+            <span className="font-bold text-error">
+              {formatCurrency(receivable.remainingAmount)}
+            </span>
           </div>
         </div>
 
@@ -129,14 +143,29 @@ export default function RecordPaymentModal({
           </label>
           <div className="flex flex-wrap gap-2">
             {[
-              { value: "cash" as const, label: "نقدی", icon: <Banknote size={14} /> },
-              { value: "bank_transfer" as const, label: "انتقال بانکی", icon: <Landmark size={14} /> },
-              { value: "card" as const, label: "کارت بانکی", icon: <CreditCard size={14} /> },
+              {
+                value: "cash" as const,
+                label: "نقدی",
+                icon: <Banknote size={14} />,
+              },
+              {
+                value: "bank_transfer" as const,
+                label: "انتقال بانکی",
+                icon: <Landmark size={14} />,
+              },
+              {
+                value: "card" as const,
+                label: "کارت بانکی",
+                icon: <CreditCard size={14} />,
+              },
             ].map((opt) => (
               <button
                 key={opt.value}
                 type="button"
-                className={`btn btn-xs gap-1 ${method === opt.value ? "btn-primary" : "btn-outline"}`}
+                className={cn(
+                  "btn btn-xs gap-1",
+                  method === opt.value ? "btn-primary" : "btn-outline",
+                )}
                 onClick={() => setMethod(opt.value)}
                 disabled={isLoading}
               >
@@ -176,11 +205,22 @@ export default function RecordPaymentModal({
         </div>
 
         <div className="flex gap-2 pt-4">
-          <button type="button" className="btn btn-ghost btn-sm flex-1" onClick={onClose} disabled={isLoading}>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm flex-1"
+            onClick={onClose}
+            disabled={isLoading}
+          >
             انصراف
           </button>
-          <button type="submit" className="btn btn-primary btn-sm flex-1" disabled={isLoading}>
-            {isLoading ? <span className="loading loading-spinner loading-xs"></span> : null}
+          <button
+            type="submit"
+            className="btn btn-primary btn-sm flex-1"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="loading loading-spinner loading-xs"></span>
+            ) : null}
             ثبت پرداخت
           </button>
         </div>

@@ -1,13 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useGetUser } from "../../Features/Auth/AuthApi";
 import SidebarMenuItem, {
   type SidebarMenuItemType,
 } from "./Components/SidebarMenuItem";
 import { useAppDispatch, useAppSelector } from "../../Hooks/ReduxHooks";
-import { LogOut, Moon, Settings, Sun } from "lucide-react";
+import { LogOut, LogOutIcon, Moon, Settings, Sun } from "lucide-react";
 import { storage } from "../../Utils/Storage";
 import { authActions } from "../../Features/Auth/AuthSlice";
 import { appActions } from "../../Features/App/AppSlice";
+import Modal from "../../Components/Modals/Modal";
 
 const menuItems: SidebarMenuItemType[] = [
   { name: "داشبورد", icon: "📊", path: "/Dashboard" },
@@ -35,7 +36,7 @@ const menuItems: SidebarMenuItemType[] = [
     icon: "💵",
     children: [
       { name: "مالی", icon: "📈", path: "/Financial" },
-      { name: "مطالبات", icon: "💳", path: "/Financial/List" },
+      { name: "مطالبات", icon: "💳", path: "/Financial/Receivables" },
       { name: "تراکنش ها", icon: "💱", path: "/Financial/Transactions" },
     ],
   },
@@ -67,6 +68,7 @@ export default function Sidebar({
   isDesktopCollapsed,
   setIsDesktopCollapsed,
 }: Props) {
+  const [isOpenLogout, setIsOpenLogout] = useState(false);
   const { data: user, refetch: refetchUser } = useGetUser();
   const theme = useAppSelector((s) => s.app.theme);
   const dis = useAppDispatch();
@@ -209,7 +211,7 @@ export default function Sidebar({
             </button>
 
             {/* Settings */}
-            <button
+            {/* <button
               onClick={() => {
                 // Navigate to settings or open settings modal
                 // You can use react-router's navigate or your preferred method
@@ -220,14 +222,11 @@ export default function Sidebar({
               title="تنظیمات"
             >
               <Settings className="w-4 h-4" />
-            </button>
+            </button> */}
 
             {/* Logout */}
             <button
-              onClick={() => {
-                storage.clearTokens();
-                dis(authActions.logout());
-              }}
+              onClick={() => setIsOpenLogout(true)}
               className="btn btn-sm btn-ghost btn-circle text-error"
               aria-label="Logout"
               title="خروج"
@@ -237,6 +236,37 @@ export default function Sidebar({
           </div>
         </div>
       </aside>
+
+      <Modal
+        isOpen={isOpenLogout}
+        onClose={() => setIsOpenLogout(false)}
+        title="خروج از برنامه"
+        icon={LogOutIcon}
+      >
+        <div className="flex flex-col gap-4 items-center py-4 px-8">
+          <p className="text-base-content/70 text-sm">
+            آیا مطمئن هستید که می‌خواهید خارج شوید؟
+          </p>
+          <div className="flex gap-3 w-full">
+            <button
+              className="btn btn-error flex-1"
+              onClick={() => {
+                storage.clearTokens();
+                dis(authActions.logout());
+              }}
+            >
+              <LogOutIcon className="w-4 h-4" />
+              خروج
+            </button>
+            <button
+              className="btn btn-ghost flex-1"
+              onClick={() => setIsOpenLogout(false)}
+            >
+              انصراف
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

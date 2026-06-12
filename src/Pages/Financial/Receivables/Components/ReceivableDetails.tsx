@@ -1,6 +1,5 @@
 import {
   FileText,
-  User,
   CreditCard,
   CheckCircle2,
   Clock,
@@ -15,6 +14,13 @@ import {
   Banknote,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
+import { useGetReceivables } from "../../../../Features/Financial/FinancialApi";
+import {
+  formatCurrency,
+  toPersianDate,
+  formatNumber,
+} from "../../../../Utils/AppUtils";
+import { cn } from "../../../../Utils/Cn";
 
 export default function ReceivableDetails() {
   const navigate = useNavigate();
@@ -30,7 +36,7 @@ export default function ReceivableDetails() {
         <p className="font-medium">طلب یافت نشد</p>
         <button
           className="btn btn-ghost btn-sm mt-4"
-          onClick={() => navigate("/Accounting/Receivables")}
+          onClick={() => navigate("/Financial/Receivables")}
         >
           <ArrowLeft size={16} />
           بازگشت به لیست
@@ -121,7 +127,7 @@ export default function ReceivableDetails() {
             <button className="btn btn-ghost btn-circle btn-sm">
               <ArrowLeft
                 size={20}
-                onClick={() => navigate("/Accounting/Receivables")}
+                onClick={() => navigate("/Financial/Receivables")}
               />
             </button>
           </div>

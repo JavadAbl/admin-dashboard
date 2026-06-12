@@ -8,26 +8,45 @@ import {
   Clock,
   AlertTriangle,
   Ban,
-  BadgeDollarSign,
   User,
 } from "lucide-react";
 import ReceivableViewModal from "./ReceivableViewModal";
 import RecordPaymentModal from "./RecordPaymentModal";
-import type { Receivable, ReceivableStatus } from "../../AccountingType";
 import { formatCurrency, formatNumber } from "../../../../Utils/AppUtils";
+import type {
+  Receivable,
+  ReceivableStatus,
+} from "../../../../Features/Financial/FinancialTypes/ReceivablesType";
+import { cn } from "../../../../Utils/Cn";
 
 const getStatusBadge = (
   status: ReceivableStatus,
 ): { cls: string; label: string; icon: React.ReactNode } => {
   switch (status) {
     case "pending":
-      return { cls: "badge-warning", label: "در انتظار", icon: <Clock size={12} /> };
+      return {
+        cls: "badge-warning",
+        label: "در انتظار",
+        icon: <Clock size={12} />,
+      };
     case "partial":
-      return { cls: "badge-info", label: "پرداخت جزئی", icon: <CreditCard size={12} /> };
+      return {
+        cls: "badge-info",
+        label: "پرداخت جزئی",
+        icon: <CreditCard size={12} />,
+      };
     case "paid":
-      return { cls: "badge-success", label: "پرداخت‌شده", icon: <CheckCircle2 size={12} /> };
+      return {
+        cls: "badge-success",
+        label: "پرداخت‌شده",
+        icon: <CheckCircle2 size={12} />,
+      };
     case "overdue":
-      return { cls: "badge-error", label: "سررسید گذشته", icon: <AlertTriangle size={12} /> };
+      return {
+        cls: "badge-error",
+        label: "سررسید گذشته",
+        icon: <AlertTriangle size={12} />,
+      };
     case "written_off":
       return { cls: "badge-ghost", label: "سوخت‌شده", icon: <Ban size={12} /> };
   }
@@ -39,7 +58,8 @@ interface Props {
 
 export default function ReceivablesTableView({ receivables }: Props) {
   const navigate = useNavigate();
-  const [selectedReceivable, setSelectedReceivable] = useState<Receivable | null>(null);
+  const [selectedReceivable, setSelectedReceivable] =
+    useState<Receivable | null>(null);
   const [openModal, setOpenModal] = useState<"view" | "pay" | null>(null);
 
   const handleCloseModal = () => {
@@ -71,13 +91,10 @@ export default function ReceivablesTableView({ receivables }: Props) {
               return (
                 <tr
                   key={rec.id}
-                  className={
-                    rec.status === "written_off"
-                      ? "opacity-50"
-                      : rec.status === "overdue"
-                        ? "bg-error/5"
-                        : ""
-                  }
+                  className={cn(
+                    rec.status === "written_off" && "opacity-50",
+                    rec.status === "overdue" && "bg-error/5",
+                  )}
                 >
                   {/* Number */}
                   <td>
@@ -97,7 +114,9 @@ export default function ReceivablesTableView({ receivables }: Props) {
                   <td>
                     <div className="flex items-center gap-1">
                       <User size={12} className="text-base-content/40" />
-                      <span className="text-sm font-medium">{rec.customerName}</span>
+                      <span className="text-sm font-medium">
+                        {rec.customerName}
+                      </span>
                     </div>
                   </td>
 
@@ -136,7 +155,9 @@ export default function ReceivablesTableView({ receivables }: Props) {
 
                   {/* Status */}
                   <td>
-                    <span className={`badge badge-sm ${statusBadge.cls} gap-1`}>
+                    <span
+                      className={cn("badge badge-sm gap-1", statusBadge.cls)}
+                    >
                       {statusBadge.icon}
                       {statusBadge.label}
                     </span>
@@ -147,9 +168,17 @@ export default function ReceivablesTableView({ receivables }: Props) {
                     <button
                       className="btn btn-ghost btn-xs btn-circle"
                       popoverTarget={`popover-rec-${rec.id}`}
-                      style={{ anchorName: `--anchor-rec-${rec.id}` } as React.CSSProperties}
+                      style={
+                        {
+                          anchorName: `--anchor-rec-${rec.id}`,
+                        } as React.CSSProperties
+                      }
                     >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <svg
+                        className="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
                         <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                       </svg>
                     </button>
@@ -158,23 +187,39 @@ export default function ReceivablesTableView({ receivables }: Props) {
                       className="dropdown menu dropdown-start p-2 shadow-2xl bg-base-100 rounded-box min-w-40 border border-base-100 text-xs"
                       popover="auto"
                       id={`popover-rec-${rec.id}`}
-                      style={{ positionAnchor: `--anchor-rec-${rec.id}` } as React.CSSProperties}
+                      style={
+                        {
+                          positionAnchor: `--anchor-rec-${rec.id}`,
+                        } as React.CSSProperties
+                      }
                     >
                       <li>
-                        <a onClick={() => navigate(`/Accounting/Receivables/${rec.id}`)}>
+                        <a onClick={() => navigate(`${rec.id}`)}>
                           <Eye size={18} />
                           مشاهده جزئیات
                         </a>
                       </li>
                       <li>
-                        <a onClick={() => { setSelectedReceivable(rec); setOpenModal("view"); }}>
+                        <a
+                          onClick={() => {
+                            setSelectedReceivable(rec);
+                            setOpenModal("view");
+                          }}
+                        >
                           <FileText size={18} />
                           مشاهده اطلاعات
                         </a>
                       </li>
-                      {(rec.status === "pending" || rec.status === "partial" || rec.status === "overdue") && (
+                      {(rec.status === "pending" ||
+                        rec.status === "partial" ||
+                        rec.status === "overdue") && (
                         <li>
-                          <a onClick={() => { setSelectedReceivable(rec); setOpenModal("pay"); }}>
+                          <a
+                            onClick={() => {
+                              setSelectedReceivable(rec);
+                              setOpenModal("pay");
+                            }}
+                          >
                             <CreditCard size={18} />
                             ثبت پرداخت
                           </a>
